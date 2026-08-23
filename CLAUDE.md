@@ -173,6 +173,47 @@ writing the policies — a table with RLS and no policy denies everyone.
 
 ---
 
+## Languages
+
+English and Tagalog. Every translatable column has a `_tl` twin, and
+`src/lib/i18n/pick()` falls back to English whenever a translation is missing,
+so a half-translated recipe reads as complete English rather than blanks.
+
+**Language is set per section**, not per student (`sections.default_locale`,
+overridable by `profiles.locale`). Mixing languages inside one class would make
+the language of instruction an uncontrolled variable in the study; per-section
+keeps a group consistent and lets an English and a Tagalog group be compared
+deliberately.
+
+Translating never restructures content. The Tagalog pass writes onto the rows
+the English pass created, matched by position, so it cannot add, remove,
+reorder, or renumber anything, and cannot touch the answer key. The wizard hides
+the structural controls while the language toggle is on Tagalog.
+
+The teacher dashboard stays in English — one adult uses it, and translating it
+would double the maintenance for no gain to students.
+
+### ⚠️ Ambiguous PostgREST embeds
+
+`profiles` and `sections` reference each other twice (a student's section, and a
+teacher advising a section), as do `questions` and `choices`. A bare
+`sections(...)` or `choices(...)` embed is therefore **ambiguous** and PostgREST
+rejects it with `PGRST201`.
+
+This has now caused two outages. It compiles, it builds, and it only fails at
+runtime — the second time it put every signed-in request into a redirect loop
+between `/login` and `/home`. **Always name the constraint:**
+
+```ts
+sections!profiles_section_id_fkey(default_locale)
+choices!choices_question_id_fkey(id, label, body)
+```
+
+`tests/integration/profile-query.test.ts` guards the profiles case and asserts
+the ambiguous form still fails.
+
+---
+
 ## Offline
 
 `public/sw.js` keeps already-opened lessons readable when the connection drops.
