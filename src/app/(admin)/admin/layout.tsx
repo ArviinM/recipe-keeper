@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { signOut } from "@/app/(auth)/actions";
-import { AdminNav } from "@/components/admin/admin-nav";
+import { AdminSidebar, AdminTabs } from "@/components/admin/admin-nav";
 import { Wordmark } from "@/components/brand/logo";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
@@ -43,10 +43,14 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
         </div>
       </header>
 
+      {/* Stacked above the content on mobile. Rendering it inside the flex row
+          below turned it into a second column and crushed the page. */}
+      <AdminTabs />
+
       <div className="flex flex-1">
-        <AdminNav />
+        <AdminSidebar />
         <main className="min-w-0 flex-1 px-4 py-5 md:px-6">
-          <div className="mx-auto max-w-4xl">{children}</div>
+          <div className="mx-auto w-full max-w-4xl">{children}</div>
         </main>
       </div>
     </div>

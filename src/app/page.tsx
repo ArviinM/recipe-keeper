@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, landingPathFor } from "@/lib/auth";
 import { site } from "@/lib/site";
 
 export default async function SplashPage() {
@@ -30,7 +30,7 @@ export default async function SplashPage() {
 
       <div className="w-full max-w-sm space-y-4">
         <Button asChild size="lg" className="h-14 w-full text-base font-bold">
-          <Link href={user ? "/home" : "/login"}>
+          <Link href={user ? landingPathFor(user.role) : "/login"}>
             {user ? "Continue" : "Get Started"}
           </Link>
         </Button>

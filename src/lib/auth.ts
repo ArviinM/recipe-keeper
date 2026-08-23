@@ -67,6 +67,15 @@ export function isStaff(role: AppRole) {
   return role === "admin" || role === "teacher";
 }
 
+/**
+ * Where a role belongs after signing in. Teachers and administrators go
+ * straight to their dashboard — the student app is not their tool, and landing
+ * there showed them copy like "ask your teacher to reset your password".
+ */
+export function landingPathFor(role: AppRole) {
+  return isStaff(role) ? "/admin" : "/home";
+}
+
 /** Friendly first name for greetings: "Ana Maria Reyes" -> "Ana". */
 export function firstName(fullName: string) {
   return fullName.trim().split(/\s+/)[0] ?? fullName;

@@ -6,7 +6,9 @@ import { RecipeCard } from "@/components/student/recipe-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { firstName, requireUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
+import { firstName, isStaff, requireUser } from "@/lib/auth";
 import { getRecipes } from "@/lib/data/recipes";
 import { getProgress } from "@/lib/data/progress";
 import { site } from "@/lib/site";
@@ -15,6 +17,11 @@ export const metadata: Metadata = { title: "Home" };
 
 export default async function HomePage() {
   const user = await requireUser();
+
+  // Staff belong in the dashboard. Previewing a lesson still works — that goes
+  // to /recipes/[slug], not here.
+  if (isStaff(user.role)) redirect("/admin");
+
   const [recipes, progress] = await Promise.all([
     getRecipes(),
     getProgress(user.id),

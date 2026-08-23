@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser, landingPathFor } from "@/lib/auth";
 import { loginSchema, registerSchema, passwordSchema } from "@/lib/validation/auth";
 
 export type FormState = {
@@ -65,9 +66,13 @@ export async function signIn(
 
   if (error) return { error: genericError };
 
-  const next = String(formData.get("next") ?? "") || "/home";
+  const requested = String(formData.get("next") ?? "");
   revalidatePath("/", "layout");
-  redirect(next.startsWith("/") ? next : "/home");
+
+  if (requested.startsWith("/") && requested !== "/home") redirect(requested);
+
+  const profile = await getCurrentUser();
+  redirect(profile ? landingPathFor(profile.role) : "/home");
 }
 
 export async function register(

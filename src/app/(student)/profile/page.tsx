@@ -48,14 +48,17 @@ export default async function ProfilePage() {
 
           <dl className="space-y-3 text-sm">
             <Row label="Email" value={user.email} />
-            <Row
-              label="Grade & section"
-              value={
-                section
-                  ? `Grade ${section.grade_level} – ${section.name}`
-                  : "Not set yet"
-              }
-            />
+            {/* Grade and section only mean something for a student. */}
+            {!isStaff(user.role) && (
+              <Row
+                label="Grade & section"
+                value={
+                  section
+                    ? `Grade ${section.grade_level} – ${section.name}`
+                    : "Not set yet"
+                }
+              />
+            )}
             <Row label="Role" value={user.role} capitalize />
           </dl>
         </CardContent>
@@ -73,9 +76,13 @@ export default async function ProfilePage() {
       <Card>
         <CardContent className="space-y-3">
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Forgot your password or need to change your section? Ask your
-            teacher — they can update it for you.
+            {isStaff(user.role)
+              ? "You can change your own password here at any time."
+              : "Forgot your password or need to change your section? Ask your teacher — they can update it for you."}
           </p>
+          <Button asChild variant="outline" className="h-11 w-full font-semibold">
+            <Link href="/change-password">Change my password</Link>
+          </Button>
         </CardContent>
       </Card>
 
