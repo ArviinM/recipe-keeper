@@ -23,8 +23,8 @@ describe("quiz integrity", () => {
   let other: TestUser;
   let recipeId: string;
   let quizId: string;
-  let questionIds: string[] = [];
-  let correctByQuestion = new Map<string, string>();
+  const questionIds: string[] = [];
+  const correctByQuestion = new Map<string, string>();
 
   beforeAll(async () => {
     student = await createTestUser({

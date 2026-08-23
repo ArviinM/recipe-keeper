@@ -690,6 +690,14 @@ export type Database = {
       get_quiz_for_student: { Args: { p_recipe_id: string }; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
+      list_sections_for_registration: {
+        Args: never
+        Returns: {
+          grade_level: number
+          id: string
+          name: string
+        }[]
+      }
       submit_quiz_attempt: {
         Args: { p_answers: Json; p_recipe_id: string }
         Returns: Json
