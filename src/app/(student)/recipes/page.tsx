@@ -7,6 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { getCategories, getRecipes } from "@/lib/data/recipes";
+import { requireUser } from "@/lib/auth";
+import { dictionary } from "@/lib/i18n/dictionary";
+import { pick } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: "Recipes" };
 
@@ -17,17 +20,20 @@ export default async function RecipesPage({
   const search = typeof params.q === "string" ? params.q : "";
   const category = typeof params.category === "string" ? params.category : "";
 
+  const user = await requireUser();
+  const t = dictionary(user.locale);
+
   const [categories, recipes] = await Promise.all([
     getCategories(),
-    getRecipes({ search, categorySlug: category }),
+    getRecipes({ search, categorySlug: category, locale: user.locale }),
   ]);
 
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-extrabold tracking-tight">Recipes</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t.navRecipes}</h1>
         <p className="text-muted-foreground">
-          Choose a lesson to start learning.
+          {t.chooseLesson}
         </p>
       </header>
 
@@ -43,7 +49,7 @@ export default async function RecipesPage({
           type="search"
           name="q"
           defaultValue={search}
-          placeholder="Search recipe…"
+          placeholder={t.searchRecipe}
           aria-label="Search recipes"
           className="h-12 pl-11"
         />
@@ -53,7 +59,7 @@ export default async function RecipesPage({
         <ul className="flex w-max gap-2 pb-1">
           <CategoryChip
             href={search ? `/recipes?q=${encodeURIComponent(search)}` : "/recipes"}
-            label="All"
+            label={t.all}
             active={!category}
           />
           {categories.map((item) => {
@@ -64,7 +70,7 @@ export default async function RecipesPage({
               <CategoryChip
                 key={item.id}
                 href={`/recipes?${query.toString()}`}
-                label={item.name}
+                label={pick(user.locale, item.name, item.name_tl)}
                 active={category === item.slug}
               />
             );
@@ -76,7 +82,7 @@ export default async function RecipesPage({
         <Card>
           <CardContent className="py-12 text-center">
             <p className="font-semibold">
-              {search ? `No recipes found for “${search}”` : "No recipes here yet"}
+              {search ? `“${search}” — 0` : t.noRecipesHere}
             </p>
             <p className="text-muted-foreground mt-1 text-sm">
               {search
@@ -88,7 +94,7 @@ export default async function RecipesPage({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <RecipeCard key={recipe.id} recipe={recipe} locale={user.locale} />
           ))}
         </div>
       )}

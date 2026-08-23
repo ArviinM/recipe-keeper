@@ -4,11 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { requireUser } from "@/lib/auth";
 import { getProgress, getQuizStatuses } from "@/lib/data/progress";
+import { dictionary } from "@/lib/i18n/dictionary";
 
 export const metadata: Metadata = { title: "My Progress" };
 
 export default async function ProgressPage() {
   const user = await requireUser();
+  const t = dictionary(user.locale);
   const [progress, quizzes] = await Promise.all([
     getProgress(user.id),
     getQuizStatuses(user.id),
@@ -22,25 +24,25 @@ export default async function ProgressPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-extrabold tracking-tight">My Progress</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t.myProgress}</h1>
         <p className="text-muted-foreground">{user.fullName}</p>
       </header>
 
       <div className="grid grid-cols-2 gap-3">
         <StatCard
-          label="Recipes completed"
+          label={t.recipesCompleted}
           value={`${progress.recipesCompleted}/${progress.totalRecipes}`}
         />
         <StatCard
-          label="Quizzes completed"
+          label={t.quizzesCompleted}
           value={`${progress.quizzesCompleted}/${progress.totalQuizzes}`}
         />
         <StatCard
-          label="Average score"
+          label={t.averageScore}
           value={progress.quizzesCompleted ? `${progress.averagePercentage}%` : "—"}
         />
         <StatCard
-          label="Quizzes passed"
+          label={t.quizzesPassed}
           value={`${progress.quizzesPassed}`}
         />
       </div>
@@ -48,7 +50,7 @@ export default async function ProgressPage() {
       <Card>
         <CardContent className="space-y-3">
           <div className="flex items-baseline justify-between">
-            <h2 className="font-bold">Lessons completed</h2>
+            <h2 className="font-bold">{t.lessonsCompleted}</h2>
             <span className="text-muted-foreground text-sm font-semibold">
               {pct(progress.recipesCompleted, progress.totalRecipes)}%
             </span>
@@ -58,13 +60,13 @@ export default async function ProgressPage() {
             className="h-3"
           />
           <p className="text-muted-foreground text-sm">
-            A lesson counts as completed once you have taken its quiz.
+            {t.completedWhenQuizTaken}
           </p>
         </CardContent>
       </Card>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">Quiz scores</h2>
+        <h2 className="text-lg font-bold">{t.quizScores}</h2>
         {taken.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center">

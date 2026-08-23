@@ -47,6 +47,7 @@ export default async function QuizPage({
   // The answer key never travels: this RPC returns prompts and choices only.
   const { data, error } = await supabase.rpc("get_quiz_for_student", {
     p_recipe_id: recipe.id,
+    p_locale: user.locale,
   });
 
   if (error || !data) {
@@ -69,6 +70,7 @@ export default async function QuizPage({
 
   return (
     <QuizRunner
+      locale={user.locale}
       recipeId={recipe.id}
       recipeSlug={recipe.slug}
       recipeTitle={recipe.title}

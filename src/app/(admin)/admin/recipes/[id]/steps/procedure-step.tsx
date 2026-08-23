@@ -11,18 +11,34 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import type { WizardRecipe } from "../recipe-wizard";
+import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
 type Row = { instruction: string; imagePath: string | null };
 
-export function ProcedureStep({ recipe }: { recipe: WizardRecipe }) {
+export function ProcedureStep({
+  recipe,
+  editLocale,
+}: {
+  recipe: WizardRecipe;
+  editLocale: Locale;
+}) {
+  const tagalog = editLocale === "tl";
+  // Translating never adds, removes, or reorders a step — it only replaces the
+  // words on the steps English already numbered.
+  const source = tagalog
+    ? recipe.steps.map((step, i) => ({
+        instruction: recipe.tl.steps[i]?.instruction ?? "",
+        imagePath: step.imagePath,
+      }))
+    : recipe.steps;
   const [rows, setRows] = useState<Row[]>(
-    recipe.steps.length ? recipe.steps : [{ instruction: "", imagePath: null }],
+    source.length ? source : [{ instruction: "", imagePath: null }],
   );
 
   const save = useCallback(
-    (current: Row[]) => saveSteps(recipe.id, current),
-    [recipe.id],
+    (current: Row[]) => saveSteps(recipe.id, current, editLocale),
+    [recipe.id, editLocale],
   );
   const { status, error } = useAutosave(rows, save);
 
@@ -42,7 +58,11 @@ export function ProcedureStep({ recipe }: { recipe: WizardRecipe }) {
     <div className="space-y-5">
       <StepHeader
         title="Procedure"
-        hint="Write one step at a time. Steps are numbered automatically, so you can reorder them freely."
+        hint={
+          tagalog
+            ? "Translate each step. Add, remove, and reorder steps on the English page."
+            : "Write one step at a time. Steps are numbered automatically, so you can reorder them freely."
+        }
         status={<SaveStatusLabel status={status} error={error} />}
       />
 
@@ -55,6 +75,7 @@ export function ProcedureStep({ recipe }: { recipe: WizardRecipe }) {
               </span>
               <span className="text-sm font-semibold">Step {index + 1}</span>
 
+              {!tagalog && (
               <div className="ml-auto flex items-center gap-0.5">
                 <Button
                   type="button"
@@ -89,6 +110,7 @@ export function ProcedureStep({ recipe }: { recipe: WizardRecipe }) {
                   <Trash2 className="size-4" />
                 </Button>
               </div>
+              )}
             </div>
 
             <Textarea
@@ -100,6 +122,7 @@ export function ProcedureStep({ recipe }: { recipe: WizardRecipe }) {
               aria-label={`Instruction for step ${index + 1}`}
             />
 
+            {!tagalog && (
             <details className="group">
               <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm font-semibold">
                 {row.imagePath ? "Photo added" : "Add a photo for this step (optional)"}
@@ -114,19 +137,24 @@ export function ProcedureStep({ recipe }: { recipe: WizardRecipe }) {
                 />
               </div>
             </details>
+            )}
           </div>
         ))}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="h-11 w-full font-semibold"
-        onClick={() => setRows((prev) => [...prev, { instruction: "", imagePath: null }])}
-      >
-        <Plus aria-hidden />
-        Add another step
-      </Button>
+      {!tagalog && (
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full font-semibold"
+          onClick={() =>
+            setRows((prev) => [...prev, { instruction: "", imagePath: null }])
+          }
+        >
+          <Plus aria-hidden />
+          Add another step
+        </Button>
+      )}
     </div>
   );
 }

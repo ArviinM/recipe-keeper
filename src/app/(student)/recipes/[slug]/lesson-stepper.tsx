@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { RecipeDetail } from "@/lib/data/recipes";
+import { dictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n";
 
 type Step = {
   key: string;
@@ -29,7 +31,14 @@ type Step = {
   content: React.ReactNode;
 };
 
-export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
+export function LessonStepper({
+  recipe,
+  locale,
+}: {
+  recipe: RecipeDetail;
+  locale: Locale;
+}) {
+  const t = dictionary(locale);
   const [index, setIndex] = useState(0);
   const [gathered, setGathered] = useState<Set<string>>(new Set());
 
@@ -49,7 +58,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
 
     list.push({
       key: "overview",
-      title: "Overview",
+      title: t.overview,
       icon: ChefHat,
       content: (
         <div className="space-y-4">
@@ -67,9 +76,9 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
           ) : null}
 
           <div className="flex flex-wrap gap-2">
-            {recipe.categories?.name && (
+            {recipe.categoryName && (
               <Badge variant="secondary" className="font-semibold">
-                {recipe.categories.name}
+                {recipe.categoryName}
               </Badge>
             )}
             {recipe.difficulty && (
@@ -78,10 +87,14 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
               </Badge>
             )}
             {recipe.servings ? (
-              <Badge variant="outline">{recipe.servings} servings</Badge>
+              <Badge variant="outline">
+                {recipe.servings} {t.servings}
+              </Badge>
             ) : null}
             {recipe.cook_minutes ? (
-              <Badge variant="outline">{recipe.cook_minutes} min cooking</Badge>
+              <Badge variant="outline">
+                {recipe.cook_minutes} {t.minCooking}
+              </Badge>
             ) : null}
           </div>
 
@@ -92,7 +105,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
           {recipe.video_url && (
             <Button asChild variant="outline" className="h-12 w-full font-bold">
               <a href={recipe.video_url} target="_blank" rel="noreferrer">
-                Watch Demonstration
+                {t.watchDemonstration}
               </a>
             </Button>
           )}
@@ -103,12 +116,12 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     if (recipe.objectives?.length) {
       list.push({
         key: "objectives",
-        title: "Learning Objectives",
+        title: t.learningObjectives,
         icon: Target,
         content: (
           <div className="space-y-4">
             <p className="text-muted-foreground">
-              After this lesson, you should be able to:
+              {t.objectivesIntro}
             </p>
             <ol className="space-y-3">
               {recipe.objectives.map((objective, i) => (
@@ -130,12 +143,12 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     if (recipe.ingredients.length) {
       list.push({
         key: "ingredients",
-        title: "Ingredients",
+        title: t.ingredients,
         icon: Utensils,
         content: (
           <div className="space-y-4">
             <p className="text-muted-foreground">
-              Tap each one as you gather it.
+              {t.ingredientsHint}
             </p>
             <ul className="space-y-2">
               {recipe.ingredients.map((ingredient) => {
@@ -198,7 +211,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     if (recipe.steps.length) {
       list.push({
         key: "procedure",
-        title: "Procedure",
+        title: t.procedure,
         icon: ClipboardList,
         content: (
           <ol className="space-y-5">
@@ -233,7 +246,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     if (recipe.techniques.length) {
       list.push({
         key: "techniques",
-        title: "Cooking Techniques",
+        title: t.cookingTechniques,
         icon: Flame,
         content: (
           <div className="space-y-3">
@@ -255,7 +268,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     if (recipe.safety_notes?.length) {
       list.push({
         key: "safety",
-        title: "Kitchen Safety & Sanitation",
+        title: t.safety,
         icon: ShieldCheck,
         content: (
           // The spec asks for this section to be visually noticeable, so it gets
@@ -282,7 +295,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     if (recipe.chef_tips?.length) {
       list.push({
         key: "tips",
-        title: "Chef's Tips",
+        title: t.chefTips,
         icon: Lightbulb,
         content: (
           <ul className="space-y-3">
@@ -302,7 +315,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
     }
 
     return list;
-  }, [recipe, gathered, toggleIngredient]);
+  }, [recipe, gathered, toggleIngredient, t]);
 
   const current = steps[index];
   const isLast = index === steps.length - 1;
@@ -368,7 +381,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
           disabled={index === 0}
         >
           <ArrowLeft aria-hidden />
-          Back
+          {t.back}
         </Button>
 
         {isLast ? (
@@ -376,12 +389,12 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
             <Button asChild className="h-13 flex-[1.4] font-bold">
               <Link href={`/recipes/${recipe.slug}/quiz`}>
                 <ListChecks aria-hidden />
-                Take the Quiz
+                {t.takeTheQuiz}
               </Link>
             </Button>
           ) : (
             <Button asChild variant="secondary" className="h-13 flex-[1.4] font-bold">
-              <Link href="/recipes">Back to Recipes</Link>
+              <Link href="/recipes">{t.backToRecipes}</Link>
             </Button>
           )
         ) : (
@@ -389,7 +402,7 @@ export function LessonStepper({ recipe }: { recipe: RecipeDetail }) {
             className="h-13 flex-[1.4] font-bold"
             onClick={() => setIndex((i) => Math.min(steps.length - 1, i + 1))}
           >
-            Next
+            {t.next}
             <ArrowRight aria-hidden />
           </Button>
         )}

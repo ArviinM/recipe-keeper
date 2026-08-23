@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireStaff } from "@/lib/auth";
 import * as recipes from "@/lib/recipes/mutations";
+import type { Locale } from "@/lib/i18n";
 
 export type SaveResult = { ok: boolean; error?: string };
 
@@ -28,10 +29,11 @@ export async function createRecipeDraft() {
 export async function saveRecipeBasics(
   id: string,
   values: Parameters<typeof recipes.saveRecipeBasics>[2],
+  locale: Locale = "en",
 ): Promise<SaveResult> {
   await requireStaff();
   const supabase = await createClient();
-  const result = await recipes.saveRecipeBasics(supabase, id, values);
+  const result = await recipes.saveRecipeBasics(supabase, id, values, locale);
   if (result.ok) revalidatePath("/admin/recipes");
   return result;
 }
@@ -39,28 +41,31 @@ export async function saveRecipeBasics(
 export async function saveRecipeLists(
   id: string,
   values: Parameters<typeof recipes.saveRecipeLists>[2],
+  locale: Locale = "en",
 ): Promise<SaveResult> {
   await requireStaff();
   const supabase = await createClient();
-  return recipes.saveRecipeLists(supabase, id, values);
+  return recipes.saveRecipeLists(supabase, id, values, locale);
 }
 
 export async function saveIngredients(
   id: string,
   rows: Parameters<typeof recipes.saveIngredients>[2],
+  locale: Locale = "en",
 ): Promise<SaveResult> {
   await requireStaff();
   const supabase = await createClient();
-  return recipes.saveIngredients(supabase, id, rows);
+  return recipes.saveIngredients(supabase, id, rows, locale);
 }
 
 export async function saveSteps(
   id: string,
   rows: Parameters<typeof recipes.saveSteps>[2],
+  locale: Locale = "en",
 ): Promise<SaveResult> {
   await requireStaff();
   const supabase = await createClient();
-  return recipes.saveSteps(supabase, id, rows);
+  return recipes.saveSteps(supabase, id, rows, locale);
 }
 
 export async function saveTechniques(

@@ -9,11 +9,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import { isStaff, requireUser } from "@/lib/auth";
+import { LanguageSwitcher } from "@/components/student/language-switcher";
+import { dictionary } from "@/lib/i18n/dictionary";
 
 export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
   const user = await requireUser();
+  const t = dictionary(user.locale);
   const supabase = await createClient();
 
   const { data: section } = user.sectionId
@@ -27,7 +30,7 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-extrabold tracking-tight">Profile</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t.navProfile}</h1>
       </header>
 
       <Card>
@@ -47,19 +50,19 @@ export default async function ProfilePage() {
           <Separator />
 
           <dl className="space-y-3 text-sm">
-            <Row label="Email" value={user.email} />
+            <Row label={t.email} value={user.email} />
             {/* Grade and section only mean something for a student. */}
             {!isStaff(user.role) && (
               <Row
-                label="Grade & section"
+                label={t.gradeAndSection}
                 value={
                   section
                     ? `Grade ${section.grade_level} – ${section.name}`
-                    : "Not set yet"
+                    : t.notSetYet
                 }
               />
             )}
-            <Row label="Role" value={user.role} capitalize />
+            <Row label={t.role} value={user.role} capitalize />
           </dl>
         </CardContent>
       </Card>
@@ -75,13 +78,21 @@ export default async function ProfilePage() {
 
       <Card>
         <CardContent className="space-y-3">
+          <h2 className="font-bold">{t.language}</h2>
+          <p className="text-muted-foreground text-sm">{t.languageHint}</p>
+          <LanguageSwitcher current={user.locale} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-3">
           <p className="text-muted-foreground text-sm leading-relaxed">
             {isStaff(user.role)
               ? "You can change your own password here at any time."
               : "Forgot your password or need to change your section? Ask your teacher — they can update it for you."}
           </p>
           <Button asChild variant="outline" className="h-11 w-full font-semibold">
-            <Link href="/change-password">Change my password</Link>
+            <Link href="/change-password">{t.changeMyPassword}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -93,7 +104,7 @@ export default async function ProfilePage() {
           pendingLabel="Signing out…"
         >
           <LogOut aria-hidden />
-          Sign Out
+          {t.signOut}
         </SubmitButton>
       </form>
     </div>

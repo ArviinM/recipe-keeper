@@ -11,20 +11,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import type { WizardRecipe } from "../recipe-wizard";
+import type { Locale } from "@/lib/i18n";
 
 export function BasicsStep({
   recipe,
   categories,
   onTitleChange,
+  editLocale,
 }: {
   recipe: WizardRecipe;
   categories: { id: string; name: string }[];
   onTitleChange: (title: string) => void;
+  editLocale: Locale;
 }) {
+  const tagalog = editLocale === "tl";
   const [values, setValues] = useState({
-    title: recipe.title === "Untitled recipe" ? "" : recipe.title,
+    title: tagalog
+      ? recipe.tl.title
+      : recipe.title === "Untitled recipe"
+        ? ""
+        : recipe.title,
     categoryId: recipe.categoryId ?? "",
-    description: recipe.description,
+    description: tagalog ? recipe.tl.description : recipe.description,
     difficulty: recipe.difficulty ?? "",
     servings: recipe.servings?.toString() ?? "",
     prepMinutes: recipe.prepMinutes?.toString() ?? "",
@@ -35,17 +43,21 @@ export function BasicsStep({
 
   const save = useCallback(
     (current: typeof values) =>
-      saveRecipeBasics(recipe.id, {
-        title: current.title,
-        categoryId: current.categoryId || null,
-        description: current.description,
-        difficulty: current.difficulty || null,
-        servings: current.servings ? Number(current.servings) : null,
-        prepMinutes: current.prepMinutes ? Number(current.prepMinutes) : null,
-        cookMinutes: current.cookMinutes ? Number(current.cookMinutes) : null,
-        videoUrl: current.videoUrl,
-      }),
-    [recipe.id],
+      saveRecipeBasics(
+        recipe.id,
+        {
+          title: current.title,
+          categoryId: current.categoryId || null,
+          description: current.description,
+          difficulty: current.difficulty || null,
+          servings: current.servings ? Number(current.servings) : null,
+          prepMinutes: current.prepMinutes ? Number(current.prepMinutes) : null,
+          cookMinutes: current.cookMinutes ? Number(current.cookMinutes) : null,
+          videoUrl: current.videoUrl,
+        },
+        editLocale,
+      ),
+    [recipe.id, editLocale],
   );
 
   const { status, error } = useAutosave(values, save);
@@ -59,7 +71,11 @@ export function BasicsStep({
     <div className="space-y-5">
       <StepHeader
         title="Recipe basics"
-        hint="Give the lesson a name and a short description. You can change any of this later."
+        hint={
+          tagalog
+            ? "The Tagalog name and description. Category, photo, and timings are set on the English page."
+            : "Give the lesson a name and a short description. You can change any of this later."
+        }
         status={<SaveStatusLabel status={status} error={error} />}
       />
 
@@ -76,6 +92,7 @@ export function BasicsStep({
         />
       </div>
 
+      {!tagalog && (
       <div className="space-y-2">
         <Label htmlFor="categoryId" className="text-base">
           Category
@@ -94,6 +111,7 @@ export function BasicsStep({
           ))}
         </select>
       </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="description" className="text-base">
@@ -109,6 +127,7 @@ export function BasicsStep({
         />
       </div>
 
+      {!tagalog && (
       <div className="space-y-2">
         <Label className="text-base">Photo of the finished dish</Label>
         <ImagePicker
@@ -120,7 +139,9 @@ export function BasicsStep({
           }}
         />
       </div>
+      )}
 
+      {!tagalog && (
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Field label="Difficulty">
           <select
@@ -169,7 +190,9 @@ export function BasicsStep({
           />
         </Field>
       </div>
+      )}
 
+      {!tagalog && (
       <div className="space-y-2">
         <Label htmlFor="videoUrl" className="text-base">
           Video demonstration (optional)
@@ -186,6 +209,7 @@ export function BasicsStep({
           <strong>Unlisted</strong> so only people with the link can watch it.
         </p>
       </div>
+      )}
     </div>
   );
 }

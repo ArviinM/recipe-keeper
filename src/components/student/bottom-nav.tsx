@@ -11,17 +11,20 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { dictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n";
 
 const TABS = [
-  { href: "/home", label: "Home", icon: House },
-  { href: "/recipes", label: "Recipes", icon: BookOpen },
-  { href: "/quiz", label: "Quiz", icon: ListChecks },
-  { href: "/progress", label: "Progress", icon: ChartColumn },
-  { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/home", key: "navHome", icon: House },
+  { href: "/recipes", key: "navRecipes", icon: BookOpen },
+  { href: "/quiz", key: "navQuiz", icon: ListChecks },
+  { href: "/progress", key: "navProgress", icon: ChartColumn },
+  { href: "/profile", key: "navProfile", icon: UserRound },
 ] as const;
 
-export function BottomNav() {
+export function BottomNav({ locale }: { locale: Locale }) {
   const pathname = usePathname();
+  const t = dictionary(locale);
 
   // Hidden inside a lesson or quiz. Those screens own the bottom of the viewport
   // with their own Back/Next bar, and a guided flow should not offer five ways
@@ -37,7 +40,8 @@ export function BottomNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex max-w-2xl">
-        {TABS.map(({ href, label, icon: Icon }) => {
+        {TABS.map(({ href, key, icon: Icon }) => {
+          const label = t[key];
           const active =
             pathname === href || pathname.startsWith(`${href}/`);
 

@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 import type { WizardRecipe } from "../recipe-wizard";
+import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
 const LABELS = ["A", "B", "C", "D"];
@@ -29,25 +30,48 @@ const blankQuestion = (): Question => ({
   choices: LABELS.map((label) => ({ id: null, label, body: "" })),
 });
 
-export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
+export function QuizStep({
+  recipe,
+  editLocale,
+}: {
+  recipe: WizardRecipe;
+  editLocale: Locale;
+}) {
+  const tagalog = editLocale === "tl";
   const [settings, setSettings] = useState({
-    title: recipe.quiz.title,
-    instructions: recipe.quiz.instructions,
+    title: tagalog ? recipe.tl.quizTitle : recipe.quiz.title,
+    instructions: tagalog ? recipe.tl.quizInstructions : recipe.quiz.instructions,
     passingPercentage: recipe.quiz.passingPercentage,
     revealAnswers: recipe.quiz.revealAnswers,
     isPublished: recipe.quiz.isPublished,
   });
+  // Translating layers words onto the existing questions; the answer key and
+  // the question list are only ever changed on the English page.
+  const questionSource = tagalog
+    ? recipe.quiz.questions.map((q, i) => ({
+        ...q,
+        prompt: recipe.tl.questions[i]?.prompt ?? "",
+        explanation: recipe.tl.questions[i]?.explanation ?? "",
+        choices: q.choices.map((choice) => ({
+          ...choice,
+          body:
+            recipe.tl.questions[i]?.choices.find((c) => c.label === choice.label)
+              ?.body ?? "",
+        })),
+      }))
+    : recipe.quiz.questions;
+
   const [questions, setQuestions] = useState<Question[]>(
-    recipe.quiz.questions.length ? recipe.quiz.questions : [blankQuestion()],
+    questionSource.length ? questionSource : [blankQuestion()],
   );
 
   const saveSettings = useCallback(
-    (current: typeof settings) => saveQuizSettings(recipe.id, current),
-    [recipe.id],
+    (current: typeof settings) => saveQuizSettings(recipe.id, current, editLocale),
+    [recipe.id, editLocale],
   );
   const saveQs = useCallback(
-    (current: Question[]) => saveQuestions(recipe.id, current),
-    [recipe.id],
+    (current: Question[]) => saveQuestions(recipe.id, current, editLocale),
+    [recipe.id, editLocale],
   );
 
   const settingsSave = useAutosave(settings, saveSettings);
@@ -109,6 +133,7 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
           />
         </div>
 
+        {!tagalog && (
         <div className="space-y-2">
           <Label htmlFor="passing" className="text-base">
             Passing score (%)
@@ -126,7 +151,9 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
             className="h-12 w-32"
           />
         </div>
+        )}
 
+        {!tagalog && (
         <Card>
           <CardContent className="space-y-4">
             <ToggleRow
@@ -143,6 +170,7 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
             />
           </CardContent>
         </Card>
+        )}
       </section>
 
       <section className="space-y-4">
@@ -167,18 +195,20 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
                     {index + 1}
                   </span>
                   <span className="text-sm font-semibold">Question {index + 1}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-destructive ml-auto size-9"
-                    onClick={() =>
-                      setQuestions((prev) => prev.filter((_, i) => i !== index))
-                    }
-                    aria-label={`Remove question ${index + 1}`}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                  {!tagalog && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive ml-auto size-9"
+                      onClick={() =>
+                        setQuestions((prev) => prev.filter((_, i) => i !== index))
+                      }
+                      aria-label={`Remove question ${index + 1}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  )}
                 </div>
 
                 <Textarea
@@ -192,7 +222,9 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
 
                 <div className="space-y-2">
                   <p className="text-muted-foreground text-sm font-semibold">
-                    Choices — tap the letter to mark the correct answer
+                    {tagalog
+                      ? "Translate each choice. The correct answer is set on the English page."
+                      : "Choices — tap the letter to mark the correct answer"}
                   </p>
                   {question.choices.map((choice) => {
                     const correct = question.correctLabel === choice.label;
@@ -200,6 +232,7 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
                       <div key={choice.label} className="flex items-center gap-2">
                         <button
                           type="button"
+                          disabled={tagalog}
                           onClick={() =>
                             updateQuestion(index, { correctLabel: choice.label })
                           }
@@ -245,15 +278,17 @@ export function QuizStep({ recipe }: { recipe: WizardRecipe }) {
           ))}
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11 w-full font-semibold"
-          onClick={() => setQuestions((prev) => [...prev, blankQuestion()])}
-        >
-          <Plus aria-hidden />
-          Add another question
-        </Button>
+        {!tagalog && (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 w-full font-semibold"
+            onClick={() => setQuestions((prev) => [...prev, blankQuestion()])}
+          >
+            <Plus aria-hidden />
+            Add another question
+          </Button>
+        )}
       </section>
     </div>
   );

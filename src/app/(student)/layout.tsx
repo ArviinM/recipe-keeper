@@ -36,7 +36,7 @@ export default async function StudentLayout({ children }: LayoutProps<"/">) {
       <div className="mx-auto w-full max-w-2xl flex-1 px-4 pb-6 pt-5">
         {children}
       </div>
-      <BottomNav />
+      <BottomNav locale={user.locale} />
     </div>
   );
 }

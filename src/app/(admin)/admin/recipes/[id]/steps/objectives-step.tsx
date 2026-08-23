@@ -8,16 +8,24 @@ import { SaveStatusLabel } from "@/components/admin/save-status";
 import { useAutosave } from "@/components/admin/use-autosave";
 
 import type { WizardRecipe } from "../recipe-wizard";
+import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
-export function ObjectivesStep({ recipe }: { recipe: WizardRecipe }) {
-  const [items, setItems] = useState(
-    recipe.objectives.length ? recipe.objectives : [""],
-  );
+export function ObjectivesStep({
+  recipe,
+  editLocale,
+}: {
+  recipe: WizardRecipe;
+  editLocale: Locale;
+}) {
+  const source =
+    editLocale === "tl" ? recipe.tl.objectives : recipe.objectives;
+  const [items, setItems] = useState(source.length ? source : [""]);
 
   const save = useCallback(
-    (current: string[]) => saveRecipeLists(recipe.id, { objectives: current }),
-    [recipe.id],
+    (current: string[]) =>
+      saveRecipeLists(recipe.id, { objectives: current }, editLocale),
+    [recipe.id, editLocale],
   );
   const { status, error } = useAutosave(items, save);
 

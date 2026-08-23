@@ -150,6 +150,7 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          name_tl: string | null
           slug: string
           sort_order: number
           updated_at: string
@@ -160,6 +161,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          name_tl?: string | null
           slug: string
           sort_order?: number
           updated_at?: string
@@ -170,6 +172,7 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          name_tl?: string | null
           slug?: string
           sort_order?: number
           updated_at?: string
@@ -179,6 +182,7 @@ export type Database = {
       choices: {
         Row: {
           body: string
+          body_tl: string | null
           id: string
           label: string
           question_id: string
@@ -186,6 +190,7 @@ export type Database = {
         }
         Insert: {
           body: string
+          body_tl?: string | null
           id?: string
           label: string
           question_id: string
@@ -193,6 +198,7 @@ export type Database = {
         }
         Update: {
           body?: string
+          body_tl?: string | null
           id?: string
           label?: string
           question_id?: string
@@ -212,24 +218,33 @@ export type Database = {
         Row: {
           id: string
           item: string
+          item_tl: string | null
           note: string | null
+          note_tl: string | null
           quantity: string | null
+          quantity_tl: string | null
           recipe_id: string
           sort_order: number
         }
         Insert: {
           id?: string
           item: string
+          item_tl?: string | null
           note?: string | null
+          note_tl?: string | null
           quantity?: string | null
+          quantity_tl?: string | null
           recipe_id: string
           sort_order?: number
         }
         Update: {
           id?: string
           item?: string
+          item_tl?: string | null
           note?: string | null
+          note_tl?: string | null
           quantity?: string | null
+          quantity_tl?: string | null
           recipe_id?: string
           sort_order?: number
         }
@@ -250,6 +265,7 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean
+          locale: Database["public"]["Enums"]["app_locale"] | null
           must_change_password: boolean
           role: Database["public"]["Enums"]["app_role"]
           section_id: string | null
@@ -262,6 +278,7 @@ export type Database = {
           full_name: string
           id: string
           is_active?: boolean
+          locale?: Database["public"]["Enums"]["app_locale"] | null
           must_change_password?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           section_id?: string | null
@@ -274,6 +291,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean
+          locale?: Database["public"]["Enums"]["app_locale"] | null
           must_change_password?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           section_id?: string | null
@@ -295,9 +313,11 @@ export type Database = {
           correct_choice_id: string | null
           created_at: string
           explanation: string | null
+          explanation_tl: string | null
           id: string
           points: number
           prompt: string
+          prompt_tl: string | null
           quiz_id: string
           sort_order: number
           updated_at: string
@@ -306,9 +326,11 @@ export type Database = {
           correct_choice_id?: string | null
           created_at?: string
           explanation?: string | null
+          explanation_tl?: string | null
           id?: string
           points?: number
           prompt: string
+          prompt_tl?: string | null
           quiz_id: string
           sort_order?: number
           updated_at?: string
@@ -317,9 +339,11 @@ export type Database = {
           correct_choice_id?: string | null
           created_at?: string
           explanation?: string | null
+          explanation_tl?: string | null
           id?: string
           points?: number
           prompt?: string
+          prompt_tl?: string | null
           quiz_id?: string
           sort_order?: number
           updated_at?: string
@@ -346,36 +370,42 @@ export type Database = {
           created_at: string
           id: string
           instructions: string | null
+          instructions_tl: string | null
           is_published: boolean
           passing_percentage: number
           recipe_id: string
           reveal_answers: boolean
           shuffle_questions: boolean
           title: string
+          title_tl: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           instructions?: string | null
+          instructions_tl?: string | null
           is_published?: boolean
           passing_percentage?: number
           recipe_id: string
           reveal_answers?: boolean
           shuffle_questions?: boolean
           title?: string
+          title_tl?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           instructions?: string | null
+          instructions_tl?: string | null
           is_published?: boolean
           passing_percentage?: number
           recipe_id?: string
           reveal_answers?: boolean
           shuffle_questions?: boolean
           title?: string
+          title_tl?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -425,63 +455,78 @@ export type Database = {
         Row: {
           category_id: string | null
           chef_tips: string[]
+          chef_tips_tl: string[]
           cook_minutes: number | null
           created_at: string
           created_by: string | null
           description: string
+          description_tl: string | null
           difficulty: string | null
           id: string
           image_path: string | null
           is_published: boolean
           objectives: string[]
+          objectives_tl: string[]
           prep_minutes: number | null
           safety_notes: string[]
+          safety_notes_tl: string[]
           servings: number | null
           slug: string
           sort_order: number
           title: string
+          title_tl: string | null
           updated_at: string
           video_url: string | null
         }
         Insert: {
           category_id?: string | null
           chef_tips?: string[]
+          chef_tips_tl?: string[]
           cook_minutes?: number | null
           created_at?: string
           created_by?: string | null
           description?: string
+          description_tl?: string | null
           difficulty?: string | null
           id?: string
           image_path?: string | null
           is_published?: boolean
           objectives?: string[]
+          objectives_tl?: string[]
           prep_minutes?: number | null
           safety_notes?: string[]
+          safety_notes_tl?: string[]
           servings?: number | null
           slug: string
           sort_order?: number
           title: string
+          title_tl?: string | null
           updated_at?: string
           video_url?: string | null
         }
         Update: {
           category_id?: string | null
           chef_tips?: string[]
+          chef_tips_tl?: string[]
           cook_minutes?: number | null
           created_at?: string
           created_by?: string | null
           description?: string
+          description_tl?: string | null
           difficulty?: string | null
           id?: string
           image_path?: string | null
           is_published?: boolean
           objectives?: string[]
+          objectives_tl?: string[]
           prep_minutes?: number | null
           safety_notes?: string[]
+          safety_notes_tl?: string[]
           servings?: number | null
           slug?: string
           sort_order?: number
           title?: string
+          title_tl?: string | null
           updated_at?: string
           video_url?: string | null
         }
@@ -512,6 +557,7 @@ export type Database = {
       sections: {
         Row: {
           created_at: string
+          default_locale: Database["public"]["Enums"]["app_locale"]
           grade_level: number
           id: string
           is_active: boolean
@@ -522,6 +568,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_locale?: Database["public"]["Enums"]["app_locale"]
           grade_level?: number
           id?: string
           is_active?: boolean
@@ -532,6 +579,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_locale?: Database["public"]["Enums"]["app_locale"]
           grade_level?: number
           id?: string
           is_active?: boolean
@@ -562,6 +610,7 @@ export type Database = {
           id: string
           image_path: string | null
           instruction: string
+          instruction_tl: string | null
           recipe_id: string
           step_number: number
         }
@@ -569,6 +618,7 @@ export type Database = {
           id?: string
           image_path?: string | null
           instruction: string
+          instruction_tl?: string | null
           recipe_id: string
           step_number: number
         }
@@ -576,6 +626,7 @@ export type Database = {
           id?: string
           image_path?: string | null
           instruction?: string
+          instruction_tl?: string | null
           recipe_id?: string
           step_number?: number
         }
@@ -593,8 +644,10 @@ export type Database = {
         Row: {
           created_at: string
           description: string
+          description_tl: string | null
           id: string
           name: string
+          name_tl: string | null
           slug: string
           sort_order: number
           updated_at: string
@@ -602,8 +655,10 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
+          description_tl?: string | null
           id?: string
           name: string
+          name_tl?: string | null
           slug: string
           sort_order?: number
           updated_at?: string
@@ -611,8 +666,10 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
+          description_tl?: string | null
           id?: string
           name?: string
+          name_tl?: string | null
           slug?: string
           sort_order?: number
           updated_at?: string
@@ -687,12 +744,16 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       can_view_student: { Args: { p_student_id: string }; Returns: boolean }
-      get_quiz_for_student: { Args: { p_recipe_id: string }; Returns: Json }
+      get_quiz_for_student: {
+        Args: { p_locale?: string; p_recipe_id: string }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       list_sections_for_registration: {
         Args: never
         Returns: {
+          default_locale: Database["public"]["Enums"]["app_locale"]
           grade_level: number
           id: string
           name: string
@@ -705,6 +766,7 @@ export type Database = {
       username_available: { Args: { p_username: string }; Returns: boolean }
     }
     Enums: {
+      app_locale: "en" | "tl"
       app_role: "admin" | "teacher" | "student"
     }
     CompositeTypes: {
@@ -836,6 +898,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      app_locale: ["en", "tl"],
       app_role: ["admin", "teacher", "student"],
     },
   },

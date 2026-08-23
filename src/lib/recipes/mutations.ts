@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/lib/database.types";
 import { slugify } from "@/lib/slug";
+import type { Locale } from "@/lib/i18n";
 
 /**
  * Every recipe and quiz write lives here rather than inside the server actions.
@@ -73,7 +74,22 @@ export async function saveRecipeBasics(
     cookMinutes: number | null;
     videoUrl: string | null;
   },
+  locale: Locale = "en",
 ): Promise<MutationResult> {
+  // Tagalog only carries the words. Category, timings, and the slug are
+  // language-neutral and stay on the English pass, so switching language never
+  // changes a recipe's URL.
+  if (locale === "tl") {
+    const { error } = await supabase
+      .from("recipes")
+      .update({
+        title_tl: values.title.trim() || null,
+        description_tl: values.description.trim() || null,
+      })
+      .eq("id", id);
+    return error ? fail(error.message) : ok;
+  }
+
   const title = values.title.trim() || "Untitled recipe";
 
   const { error } = await supabase
@@ -98,17 +114,20 @@ export async function saveRecipeLists(
   supabase: Client,
   id: string,
   values: { objectives?: string[]; safetyNotes?: string[]; chefTips?: string[] },
+  locale: Locale = "en",
 ): Promise<MutationResult> {
-  const patch: {
-    objectives?: string[];
-    safety_notes?: string[];
-    chef_tips?: string[];
-  } = {};
-  if (values.objectives) patch.objectives = values.objectives.filter((v) => v.trim());
-  if (values.safetyNotes) patch.safety_notes = values.safetyNotes.filter((v) => v.trim());
-  if (values.chefTips) patch.chef_tips = values.chefTips.filter((v) => v.trim());
+  const suffix = locale === "tl" ? "_tl" : "";
+  const patch: Record<string, string[]> = {};
+  if (values.objectives) patch[`objectives${suffix}`] = values.objectives.filter((v) => v.trim());
+  if (values.safetyNotes) patch[`safety_notes${suffix}`] = values.safetyNotes.filter((v) => v.trim());
+  if (values.chefTips) patch[`chef_tips${suffix}`] = values.chefTips.filter((v) => v.trim());
 
-  const { error } = await supabase.from("recipes").update(patch).eq("id", id);
+  const { error } = await supabase
+    .from("recipes")
+    // The column set is chosen above; the generated types cannot follow a
+    // computed key, so this cast is the narrow price of one shared function.
+    .update(patch as never)
+    .eq("id", id);
   return error ? fail(error.message) : ok;
 }
 
@@ -116,7 +135,32 @@ export async function saveIngredients(
   supabase: Client,
   id: string,
   rows: { quantity: string; item: string; note: string }[],
+  locale: Locale = "en",
 ): Promise<MutationResult> {
+  // Tagalog is written onto the rows English already created, matched by
+  // position, so translating never destroys the English list.
+  if (locale === "tl") {
+    const { data: existing } = await supabase
+      .from("ingredients")
+      .select("id, sort_order")
+      .eq("recipe_id", id)
+      .order("sort_order");
+
+    for (const [index, row] of (existing ?? []).entries()) {
+      const source = rows[index];
+      const { error } = await supabase
+        .from("ingredients")
+        .update({
+          quantity_tl: source?.quantity.trim() || null,
+          item_tl: source?.item.trim() || null,
+          note_tl: source?.note.trim() || null,
+        })
+        .eq("id", row.id);
+      if (error) return fail(error.message);
+    }
+    return ok;
+  }
+
   // Filter before numbering, so a blank row the teacher left behind does not
   // punch a gap in sort_order. Matches how saveSteps numbers its rows.
   const clean = rows
@@ -146,7 +190,25 @@ export async function saveSteps(
   supabase: Client,
   id: string,
   rows: { instruction: string; imagePath: string | null }[],
+  locale: Locale = "en",
 ): Promise<MutationResult> {
+  if (locale === "tl") {
+    const { data: existing } = await supabase
+      .from("steps")
+      .select("id, step_number")
+      .eq("recipe_id", id)
+      .order("step_number");
+
+    for (const [index, row] of (existing ?? []).entries()) {
+      const { error } = await supabase
+        .from("steps")
+        .update({ instruction_tl: rows[index]?.instruction.trim() || null })
+        .eq("id", row.id);
+      if (error) return fail(error.message);
+    }
+    return ok;
+  }
+
   const clean = rows
     .filter((row) => row.instruction.trim().length > 0)
     .map((row, index) => ({

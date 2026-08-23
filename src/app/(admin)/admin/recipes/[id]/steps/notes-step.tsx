@@ -10,19 +10,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import type { WizardRecipe } from "../recipe-wizard";
+import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
 export function NotesStep({
   recipe,
   techniques,
+  editLocale,
 }: {
   recipe: WizardRecipe;
   techniques: { id: string; name: string; description: string }[];
+  editLocale: Locale;
 }) {
+  const tagalog = editLocale === "tl";
+  const safetySource = tagalog ? recipe.tl.safetyNotes : recipe.safetyNotes;
+  const tipsSource = tagalog ? recipe.tl.chefTips : recipe.chefTips;
+
   const [selected, setSelected] = useState<string[]>(recipe.techniqueIds);
   const [lists, setLists] = useState({
-    safetyNotes: recipe.safetyNotes.length ? recipe.safetyNotes : [""],
-    chefTips: recipe.chefTips.length ? recipe.chefTips : [""],
+    safetyNotes: safetySource.length ? safetySource : [""],
+    chefTips: tipsSource.length ? tipsSource : [""],
   });
 
   const saveTech = useCallback(
@@ -31,11 +38,12 @@ export function NotesStep({
   );
   const saveLists = useCallback(
     (current: typeof lists) =>
-      saveRecipeLists(recipe.id, {
-        safetyNotes: current.safetyNotes,
-        chefTips: current.chefTips,
-      }),
-    [recipe.id],
+      saveRecipeLists(
+        recipe.id,
+        { safetyNotes: current.safetyNotes, chefTips: current.chefTips },
+        editLocale,
+      ),
+    [recipe.id, editLocale],
   );
 
   const tech = useAutosave(selected, saveTech);
@@ -48,6 +56,7 @@ export function NotesStep({
 
   return (
     <div className="space-y-8">
+      {!tagalog && (
       <section className="space-y-4">
         <StepHeader
           title="Cooking techniques"
@@ -80,6 +89,7 @@ export function NotesStep({
           })}
         </div>
       </section>
+      )}
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">

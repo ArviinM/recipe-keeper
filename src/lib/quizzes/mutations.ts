@@ -1,4 +1,5 @@
 import type { Client, MutationResult } from "@/lib/recipes/mutations";
+import type { Locale } from "@/lib/i18n";
 
 export type QuestionDraft = {
   id: string | null;
@@ -37,9 +38,22 @@ export async function saveQuizSettings(
     revealAnswers: boolean;
     isPublished: boolean;
   },
+  locale: Locale = "en",
 ): Promise<MutationResult> {
   try {
     const quizId = await ensureQuiz(supabase, recipeId);
+
+    if (locale === "tl") {
+      const { error } = await supabase
+        .from("quizzes")
+        .update({
+          title_tl: values.title.trim() || null,
+          instructions_tl: values.instructions.trim() || null,
+        })
+        .eq("id", quizId);
+      return error ? { ok: false, error: error.message } : { ok: true };
+    }
+
     const { error } = await supabase
       .from("quizzes")
       .update({
@@ -68,9 +82,45 @@ export async function saveQuestions(
   supabase: Client,
   recipeId: string,
   questions: QuestionDraft[],
+  locale: Locale = "en",
 ): Promise<MutationResult> {
   try {
     const quizId = await ensureQuiz(supabase, recipeId);
+
+    // Tagalog is layered onto the questions and choices English already
+    // created. It never adds, removes, or reorders anything, so translating a
+    // quiz cannot disturb the answer key or the answers students have given.
+    if (locale === "tl") {
+      const { data: existing } = await supabase
+        .from("questions")
+        .select("id, sort_order, choices!choices_question_id_fkey(id, label)")
+        .eq("quiz_id", quizId)
+        .order("sort_order");
+
+      for (const [index, question] of (existing ?? []).entries()) {
+        const source = questions[index];
+        if (!source) continue;
+
+        const { error } = await supabase
+          .from("questions")
+          .update({
+            prompt_tl: source.prompt.trim() || null,
+            explanation_tl: source.explanation.trim() || null,
+          })
+          .eq("id", question.id);
+        if (error) return { ok: false, error: error.message };
+
+        for (const choice of question.choices) {
+          const translated = source.choices.find((c) => c.label === choice.label);
+          const { error: choiceError } = await supabase
+            .from("choices")
+            .update({ body_tl: translated?.body.trim() || null })
+            .eq("id", choice.id);
+          if (choiceError) return { ok: false, error: choiceError.message };
+        }
+      }
+      return { ok: true };
+    }
 
     const usable = questions.filter((q) => q.prompt.trim().length > 0);
     const keptIds = usable.map((q) => q.id).filter((id): id is string => Boolean(id));

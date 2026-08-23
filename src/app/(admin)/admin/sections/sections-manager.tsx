@@ -9,13 +9,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { createSection, deleteSection } from "./actions";
+import { LOCALES, type Locale } from "@/lib/i18n";
+
+import { createSection, deleteSection, setSectionLocale } from "./actions";
 
 type Section = {
   id: string;
   grade_level: number;
   name: string;
   school_year: string;
+  default_locale: Locale;
   studentCount: number;
   isMine: boolean;
 };
@@ -54,7 +57,7 @@ export function SectionsManager({
         <Card>
           <CardContent>
             <form
-              className="grid gap-4 sm:grid-cols-[7rem_1fr_9rem_auto] sm:items-end"
+              className="grid gap-4 sm:grid-cols-[6rem_1fr_8rem_8rem_auto] sm:items-end"
               action={(formData) => {
                 setError(null);
                 startTransition(async () => {
@@ -63,6 +66,8 @@ export function SectionsManager({
                     name: String(formData.get("name") ?? ""),
                     schoolYear: String(formData.get("schoolYear") ?? ""),
                     assignToMe: true,
+                    defaultLocale: (String(formData.get("defaultLocale") ?? "en") ||
+                      "en") as Locale,
                   });
                   if (result.ok) setAdding(false);
                   else setError(result.error ?? "Could not create the section.");
@@ -99,6 +104,21 @@ export function SectionsManager({
                   defaultValue="2026-2027"
                   className="h-11"
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="defaultLocale">Language</Label>
+                <select
+                  id="defaultLocale"
+                  name="defaultLocale"
+                  defaultValue="en"
+                  className="border-input bg-background h-11 w-full rounded-md border px-3"
+                >
+                  {LOCALES.map((locale) => (
+                    <option key={locale.value} value={locale.value}>
+                      {locale.label}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-2">
                 <Button type="submit" className="h-11 font-bold" disabled={pending}>
@@ -146,6 +166,27 @@ export function SectionsManager({
                       {section.studentCount === 1 ? "" : "s"}
                     </p>
                   </div>
+
+                  <select
+                    defaultValue={section.default_locale}
+                    disabled={pending}
+                    aria-label={`Language for ${section.name}`}
+                    onChange={(event) => {
+                      setError(null);
+                      const value = event.target.value as Locale;
+                      startTransition(async () => {
+                        const result = await setSectionLocale(section.id, value);
+                        if (!result.ok) setError(result.error ?? "Could not change the language.");
+                      });
+                    }}
+                    className="border-input bg-background h-10 rounded-md border px-2 text-sm"
+                  >
+                    {LOCALES.map((locale) => (
+                      <option key={locale.value} value={locale.value}>
+                        {locale.label}
+                      </option>
+                    ))}
+                  </select>
 
                   {isAdmin && (
                     <Button

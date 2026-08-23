@@ -6,8 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { RecipeCard as RecipeCardData } from "@/lib/data/recipes";
+import { dictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n";
 
-export function RecipeCard({ recipe }: { recipe: RecipeCardData }) {
+export function RecipeCard({
+  recipe,
+  locale = "en",
+}: {
+  recipe: RecipeCardData;
+  locale?: Locale;
+}) {
+  const t = dictionary(locale);
   return (
     <Card className="overflow-hidden py-0 shadow-sm transition-shadow hover:shadow-md">
       <Link href={`/recipes/${recipe.slug}`} className="block">
@@ -45,7 +54,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeCardData }) {
           {recipe.hasQuiz && (
             <span className="text-muted-foreground inline-flex items-center gap-1 text-xs font-semibold">
               <ListChecks className="size-3.5" aria-hidden />
-              Quiz
+              {t.navQuiz}
             </span>
           )}
         </div>
@@ -64,7 +73,7 @@ export function RecipeCard({ recipe }: { recipe: RecipeCardData }) {
         </div>
 
         <Button asChild className="h-11 w-full font-bold">
-          <Link href={`/recipes/${recipe.slug}`}>View Recipe</Link>
+          <Link href={`/recipes/${recipe.slug}`}>{t.viewRecipe}</Link>
         </Button>
       </div>
     </Card>

@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { LOCALES, type Locale } from "@/lib/i18n";
 
 import { BasicsStep } from "./steps/basics-step";
 import { ObjectivesStep } from "./steps/objectives-step";
@@ -48,6 +49,19 @@ export type WizardRecipe = {
       choices: { id: string | null; label: string; body: string }[];
     }[];
   };
+  /** The Tagalog twin of everything above that carries words. */
+  tl: {
+    title: string;
+    description: string;
+    objectives: string[];
+    safetyNotes: string[];
+    chefTips: string[];
+    ingredients: { quantity: string; item: string; note: string }[];
+    steps: { instruction: string; imagePath: string | null }[];
+    quizTitle: string;
+    quizInstructions: string;
+    questions: WizardRecipe["quiz"]["questions"];
+  };
 };
 
 const STEPS = [
@@ -72,6 +86,7 @@ export function RecipeWizard({
   const [index, setIndex] = useState(0);
   const [title, setTitle] = useState(recipe.title);
   const [published, setPublished] = useState(recipe.isPublished);
+  const [editLocale, setEditLocale] = useState<Locale>("en");
 
   const step = STEPS[index];
   const isLast = index === STEPS.length - 1;
@@ -91,6 +106,37 @@ export function RecipeWizard({
           <span className="text-muted-foreground shrink-0 text-sm font-semibold">
             Step {index + 1} of {STEPS.length}
           </span>
+        </div>
+
+        {/* English is written first because it is what students fall back to
+            when a translation is missing. */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground text-sm font-semibold">
+            Writing in
+          </span>
+          <div className="bg-secondary flex gap-1 rounded-lg p-1">
+            {LOCALES.map((locale) => (
+              <button
+                key={locale.value}
+                type="button"
+                aria-pressed={editLocale === locale.value}
+                onClick={() => setEditLocale(locale.value)}
+                className={cn(
+                  "min-h-9 rounded-md px-3 text-sm font-bold transition-colors",
+                  editLocale === locale.value
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {locale.label}
+              </button>
+            ))}
+          </div>
+          {editLocale === "tl" && (
+            <span className="text-muted-foreground text-sm">
+              Anything left blank shows the English version to students.
+            </span>
+          )}
         </div>
 
         {/* Named, clickable steps rather than a bare bar: a teacher coming back
@@ -122,13 +168,34 @@ export function RecipeWizard({
 
       <div className="min-h-[24rem]">
         {step.key === "basics" && (
-          <BasicsStep recipe={recipe} categories={categories} onTitleChange={setTitle} />
+          <BasicsStep
+            key={editLocale}
+            recipe={recipe}
+            categories={categories}
+            onTitleChange={setTitle}
+            editLocale={editLocale}
+          />
         )}
-        {step.key === "objectives" && <ObjectivesStep recipe={recipe} />}
-        {step.key === "ingredients" && <IngredientsStep recipe={recipe} />}
-        {step.key === "procedure" && <ProcedureStep recipe={recipe} />}
-        {step.key === "notes" && <NotesStep recipe={recipe} techniques={techniques} />}
-        {step.key === "quiz" && <QuizStep recipe={recipe} />}
+        {step.key === "objectives" && (
+          <ObjectivesStep key={editLocale} recipe={recipe} editLocale={editLocale} />
+        )}
+        {step.key === "ingredients" && (
+          <IngredientsStep key={editLocale} recipe={recipe} editLocale={editLocale} />
+        )}
+        {step.key === "procedure" && (
+          <ProcedureStep key={editLocale} recipe={recipe} editLocale={editLocale} />
+        )}
+        {step.key === "notes" && (
+          <NotesStep
+            key={editLocale}
+            recipe={recipe}
+            techniques={techniques}
+            editLocale={editLocale}
+          />
+        )}
+        {step.key === "quiz" && (
+          <QuizStep key={editLocale} recipe={recipe} editLocale={editLocale} />
+        )}
         {step.key === "publish" && (
           <PublishStep
             recipe={recipe}

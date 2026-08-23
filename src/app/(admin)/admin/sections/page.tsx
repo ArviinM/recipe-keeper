@@ -14,7 +14,7 @@ export default async function SectionsPage() {
   const [{ data: sections }, { data: profiles }] = await Promise.all([
     supabase
       .from("sections")
-      .select("id, grade_level, name, school_year, teacher_id")
+      .select("id, grade_level, name, school_year, teacher_id, default_locale")
       .order("grade_level")
       .order("name"),
     supabase.from("profiles").select("id, section_id, role"),

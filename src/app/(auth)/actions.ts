@@ -191,3 +191,15 @@ export async function changePassword(
   revalidatePath("/", "layout");
   redirect("/home");
 }
+
+/** Stores a student's own language choice, overriding their section default. */
+export async function setLocale(locale: "en" | "tl") {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) redirect("/login");
+
+  await supabase.from("profiles").update({ locale }).eq("id", data.user.id);
+
+  revalidatePath("/", "layout");
+}

@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 import { firstName, isStaff, requireUser } from "@/lib/auth";
 import { getRecipes } from "@/lib/data/recipes";
 import { getProgress } from "@/lib/data/progress";
-import { site } from "@/lib/site";
+import { dictionary } from "@/lib/i18n/dictionary";
 
 export const metadata: Metadata = { title: "Home" };
 
@@ -22,8 +22,9 @@ export default async function HomePage() {
   // to /recipes/[slug], not here.
   if (isStaff(user.role)) redirect("/admin");
 
+  const t = dictionary(user.locale);
   const [recipes, progress] = await Promise.all([
-    getRecipes(),
+    getRecipes({ locale: user.locale }),
     getProgress(user.id),
   ]);
 
@@ -36,29 +37,30 @@ export default async function HomePage() {
     <div className="space-y-7">
       <header className="space-y-1">
         <h1 className="text-2xl font-extrabold tracking-tight">
-          Kumusta, {firstName(user.fullName)}!
+          {t.greeting}, {firstName(user.fullName)}!
         </h1>
-        <p className="text-muted-foreground">{site.tagline}</p>
+        <p className="text-muted-foreground">{t.tagline}</p>
       </header>
 
       <Card className="bg-accent/60 border-brand-green/20">
         <CardContent className="space-y-3">
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-bold">Your progress</h2>
+            <h2 className="font-bold">{t.yourProgress}</h2>
             <span className="text-muted-foreground text-sm font-semibold">
-              {progress.recipesCompleted} of {progress.totalRecipes} lessons
+              {progress.recipesCompleted} {t.ofLessons} {progress.totalRecipes}{" "}
+              {t.lessonsWord}
             </span>
           </div>
           <Progress value={percent} className="h-3" />
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
             <span>
               <span className="font-bold">{progress.quizzesCompleted}</span>{" "}
-              <span className="text-muted-foreground">quizzes taken</span>
+              <span className="text-muted-foreground">{t.quizzesTaken}</span>
             </span>
             {progress.quizzesCompleted > 0 && (
               <span>
                 <span className="font-bold">{progress.averagePercentage}%</span>{" "}
-                <span className="text-muted-foreground">average score</span>
+                <span className="text-muted-foreground">{t.averageScore}</span>
               </span>
             )}
           </div>
@@ -67,10 +69,10 @@ export default async function HomePage() {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Lessons</h2>
+          <h2 className="text-lg font-bold">{t.lessons}</h2>
           <Button asChild variant="ghost" size="sm" className="font-semibold">
             <Link href="/recipes">
-              See all
+              {t.seeAll}
               <ArrowRight aria-hidden />
             </Link>
           </Button>
@@ -79,16 +81,16 @@ export default async function HomePage() {
         {recipes.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center">
-              <p className="font-semibold">No lessons yet</p>
+              <p className="font-semibold">{t.noLessonsYet}</p>
               <p className="text-muted-foreground mt-1 text-sm">
-                Your teacher has not published any recipes yet. Check back soon.
+                {t.noLessonsBody}
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {recipes.slice(0, 4).map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard key={recipe.id} recipe={recipe} locale={user.locale} />
             ))}
           </div>
         )}

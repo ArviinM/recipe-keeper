@@ -10,20 +10,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import type { WizardRecipe } from "../recipe-wizard";
+import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
 type Row = { quantity: string; item: string; note: string };
 
 const EMPTY: Row = { quantity: "", item: "", note: "" };
 
-export function IngredientsStep({ recipe }: { recipe: WizardRecipe }) {
-  const [rows, setRows] = useState<Row[]>(
-    recipe.ingredients.length ? recipe.ingredients : [EMPTY],
-  );
+export function IngredientsStep({
+  recipe,
+  editLocale,
+}: {
+  recipe: WizardRecipe;
+  editLocale: Locale;
+}) {
+  const tagalog = editLocale === "tl";
+  // Tagalog is layered onto the rows English created, so the list length is
+  // fixed here and only the words can change.
+  const source = tagalog
+    ? recipe.ingredients.map((_, i) => recipe.tl.ingredients[i] ?? EMPTY)
+    : recipe.ingredients;
+  const [rows, setRows] = useState<Row[]>(source.length ? source : [EMPTY]);
 
   const save = useCallback(
-    (current: Row[]) => saveIngredients(recipe.id, current),
-    [recipe.id],
+    (current: Row[]) => saveIngredients(recipe.id, current, editLocale),
+    [recipe.id, editLocale],
   );
   const { status, error } = useAutosave(rows, save);
 
@@ -36,7 +47,11 @@ export function IngredientsStep({ recipe }: { recipe: WizardRecipe }) {
     <div className="space-y-5">
       <StepHeader
         title="Ingredients"
-        hint="Put the measurement and the ingredient in separate boxes, so students see them clearly."
+        hint={
+          tagalog
+            ? "Translate each line. Add or remove ingredients on the English page."
+            : "Put the measurement and the ingredient in separate boxes, so students see them clearly."
+        }
         status={<SaveStatusLabel status={status} error={error} />}
       />
 
@@ -66,29 +81,33 @@ export function IngredientsStep({ recipe }: { recipe: WizardRecipe }) {
                 aria-label={`Note for ingredient ${index + 1}`}
               />
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-destructive mt-1 size-10 shrink-0"
-              onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
-              aria-label={`Remove ingredient ${index + 1}`}
-            >
-              <Trash2 className="size-4" />
-            </Button>
+            {!tagalog && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-destructive mt-1 size-10 shrink-0"
+                onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
+                aria-label={`Remove ingredient ${index + 1}`}
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            )}
           </div>
         ))}
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="h-11 w-full font-semibold"
-        onClick={() => setRows((prev) => [...prev, EMPTY])}
-      >
-        <Plus aria-hidden />
-        Add another ingredient
-      </Button>
+      {!tagalog && (
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full font-semibold"
+          onClick={() => setRows((prev) => [...prev, EMPTY])}
+        >
+          <Plus aria-hidden />
+          Add another ingredient
+        </Button>
+      )}
     </div>
   );
 }

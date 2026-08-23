@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/database.types";
+import type { Locale } from "@/lib/i18n";
 
 export type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -13,6 +14,7 @@ export type CurrentUser = {
   username: string;
   sectionId: string | null;
   mustChangePassword: boolean;
+  locale: Locale;
 };
 
 /** The signed-in user's profile, or null when signed out. */
@@ -26,10 +28,17 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, full_name, username, section_id, must_change_password")
+    .select(
+      "role, full_name, username, section_id, must_change_password, locale, sections(default_locale)",
+    )
     .eq("id", user.id)
     .single();
   if (!profile) return null;
+
+  // The section's language is the default so a whole class reads the same
+  // thing; a student may override it for their own reading.
+  const locale: Locale =
+    profile.locale ?? profile.sections?.default_locale ?? "en";
 
   return {
     id: user.id,
@@ -39,6 +48,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     username: profile.username,
     sectionId: profile.section_id,
     mustChangePassword: profile.must_change_password,
+    locale,
   };
 }
 

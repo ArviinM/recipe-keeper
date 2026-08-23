@@ -20,16 +20,18 @@ export default async function EditRecipePage({
       supabase
         .from("recipes")
         .select(
-          `id, title, slug, description, image_path, video_url, objectives,
-           safety_notes, chef_tips, prep_minutes, cook_minutes, servings,
+          `id, title, title_tl, slug, description, description_tl, image_path,
+           video_url, objectives, objectives_tl, safety_notes, safety_notes_tl,
+           chef_tips, chef_tips_tl, prep_minutes, cook_minutes, servings,
            difficulty, is_published, category_id,
-           ingredients(id, quantity, item, note, sort_order),
-           steps(id, step_number, instruction, image_path),
+           ingredients(id, quantity, quantity_tl, item, item_tl, note, note_tl, sort_order),
+           steps(id, step_number, instruction, instruction_tl, image_path),
            recipe_techniques(technique_id, sort_order),
-           quizzes(id, title, instructions, passing_percentage, reveal_answers,
-                   is_published,
-                   questions(id, prompt, explanation, sort_order, correct_choice_id,
-                             choices!choices_question_id_fkey(id, label, body, sort_order)))`,
+           quizzes(id, title, title_tl, instructions, instructions_tl,
+                   passing_percentage, reveal_answers, is_published,
+                   questions(id, prompt, prompt_tl, explanation, explanation_tl,
+                             sort_order, correct_choice_id,
+                             choices!choices_question_id_fkey(id, label, body, body_tl, sort_order)))`,
         )
         .eq("id", id)
         .maybeSingle(),
@@ -59,6 +61,42 @@ export default async function EditRecipePage({
         objectives: recipe.objectives ?? [],
         safetyNotes: recipe.safety_notes ?? [],
         chefTips: recipe.chef_tips ?? [],
+        tl: {
+          title: recipe.title_tl ?? "",
+          description: recipe.description_tl ?? "",
+          objectives: recipe.objectives_tl ?? [],
+          safetyNotes: recipe.safety_notes_tl ?? [],
+          chefTips: recipe.chef_tips_tl ?? [],
+          ingredients: [...(recipe.ingredients ?? [])]
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((row) => ({
+              quantity: row.quantity_tl ?? "",
+              item: row.item_tl ?? "",
+              note: row.note_tl ?? "",
+            })),
+          steps: [...(recipe.steps ?? [])]
+            .sort((a, b) => a.step_number - b.step_number)
+            .map((row) => ({
+              instruction: row.instruction_tl ?? "",
+              imagePath: row.image_path,
+            })),
+          quizTitle: quiz?.title_tl ?? "",
+          quizInstructions: quiz?.instructions_tl ?? "",
+          questions: [...(quiz?.questions ?? [])]
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((question) => ({
+              id: question.id,
+              prompt: question.prompt_tl ?? "",
+              explanation: question.explanation_tl ?? "",
+              correctLabel: "",
+              choices: ["A", "B", "C", "D"].map((label) => {
+                const match = [...(question.choices ?? [])].find(
+                  (c) => c.label === label,
+                );
+                return { id: match?.id ?? null, label, body: match?.body_tl ?? "" };
+              }),
+            })),
+        },
         ingredients: [...(recipe.ingredients ?? [])]
           .sort((a, b) => a.sort_order - b.sort_order)
           .map((row) => ({

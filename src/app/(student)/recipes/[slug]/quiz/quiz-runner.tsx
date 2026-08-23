@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+import { dictionary } from "@/lib/i18n/dictionary";
+import type { Locale } from "@/lib/i18n";
+
 import { submitQuiz, type QuizResult } from "./actions";
 
 type Question = {
@@ -28,6 +31,7 @@ type Quiz = {
 };
 
 export function QuizRunner({
+  locale,
   recipeId,
   recipeSlug,
   recipeTitle,
@@ -35,6 +39,7 @@ export function QuizRunner({
   quiz,
   questions,
 }: {
+  locale: Locale;
   recipeId: string;
   recipeSlug: string;
   recipeTitle: string;
@@ -42,6 +47,7 @@ export function QuizRunner({
   quiz: Quiz;
   questions: Question[];
 }) {
+  const t = dictionary(locale);
   const ordered = useMemo(
     () => [...questions].sort((a, b) => a.sort_order - b.sort_order),
     [questions],
@@ -56,6 +62,7 @@ export function QuizRunner({
   if (result) {
     return (
       <QuizResultView
+        locale={locale}
         result={result}
         recipeSlug={recipeSlug}
         recipeTitle={recipeTitle}
@@ -194,8 +201,7 @@ export function QuizRunner({
 
         {isLast && answeredCount < ordered.length && (
           <p className="text-muted-foreground text-sm">
-            You have answered {answeredCount} of {ordered.length}. Unanswered
-            questions are marked wrong.
+            {answeredCount} / {ordered.length} — {t.unansweredWarning}
           </p>
         )}
       </div>
@@ -211,7 +217,7 @@ export function QuizRunner({
           disabled={index === 0 || pending}
         >
           <ArrowLeft aria-hidden />
-          Back
+          {t.back}
         </Button>
 
         {isLast ? (
@@ -220,7 +226,7 @@ export function QuizRunner({
             onClick={handleSubmit}
             disabled={pending}
           >
-            {pending ? "Checking…" : "Submit Answers"}
+            {pending ? t.checking : t.submitAnswers}
           </Button>
         ) : (
           <Button
@@ -228,7 +234,7 @@ export function QuizRunner({
             onClick={() => setIndex((i) => Math.min(ordered.length - 1, i + 1))}
             disabled={pending}
           >
-            Next
+            {t.next}
             <ArrowRight aria-hidden />
           </Button>
         )}
@@ -238,23 +244,23 @@ export function QuizRunner({
 }
 
 function QuizResultView({
+  locale,
   result,
   recipeSlug,
   recipeTitle,
   studentName,
   onRetry,
 }: {
+  locale: Locale;
   result: QuizResult;
   recipeSlug: string;
   recipeTitle: string;
   studentName: string;
   onRetry: () => void;
 }) {
+  const t = dictionary(locale);
   const percentage = Number(result.percentage);
-
-  const message = result.passed
-    ? "Well done! You understood this lesson."
-    : "Good try! Review the lesson and try again to improve your score.";
+  const message = result.passed ? t.wellDone : t.goodTry;
 
   return (
     <div className="space-y-6 py-2">
@@ -283,21 +289,23 @@ function QuizResultView({
 
         {result.attempt_number > 1 && (
           <p className="text-muted-foreground text-sm">
-            Attempt {result.attempt_number}. Your best score is what counts.
+            {t.attempt} {result.attempt_number}. {t.bestScoreCounts}
           </p>
         )}
       </div>
 
       <Card>
         <CardContent className="space-y-2">
-          <h2 className="pb-1 font-bold">Your answers</h2>
+          <h2 className="pb-1 font-bold">{t.yourAnswers}</h2>
           <ul className="space-y-2">
             {result.results.map((row, i) => (
               <li
                 key={row.question_id}
                 className="flex items-center justify-between gap-3 py-1"
               >
-                <span className="text-sm font-semibold">Question {i + 1}</span>
+                <span className="text-sm font-semibold">
+                  {t.question} {i + 1}
+                </span>
                 <span
                   className={cn(
                     "inline-flex items-center gap-1.5 text-sm font-bold",
@@ -307,12 +315,12 @@ function QuizResultView({
                   {row.is_correct ? (
                     <>
                       <Check className="size-4" aria-hidden />
-                      Correct
+                      {t.correct}
                     </>
                   ) : (
                     <>
                       <X className="size-4" aria-hidden />
-                      {row.choice_id ? "Incorrect" : "Not answered"}
+                      {row.choice_id ? t.incorrect : t.notAnswered}
                     </>
                   )}
                 </span>
@@ -322,7 +330,7 @@ function QuizResultView({
 
           {!result.reveal_answers && (
             <p className="text-muted-foreground pt-2 text-xs leading-relaxed">
-              Correct answers are hidden. Review the lesson to find them.
+              {t.answersHidden}
             </p>
           )}
         </CardContent>
@@ -331,13 +339,13 @@ function QuizResultView({
       <div className="space-y-3">
         <Button onClick={onRetry} className="h-13 w-full font-bold">
           <RotateCcw aria-hidden />
-          Try Again
+          {t.tryAgain}
         </Button>
         <Button asChild variant="outline" className="h-13 w-full font-bold">
-          <Link href={`/recipes/${recipeSlug}`}>Review the Lesson</Link>
+          <Link href={`/recipes/${recipeSlug}`}>{t.reviewLesson}</Link>
         </Button>
         <Button asChild variant="ghost" className="h-12 w-full font-semibold">
-          <Link href="/progress">See My Progress</Link>
+          <Link href="/progress">{t.seeMyProgress}</Link>
         </Button>
       </div>
     </div>
