@@ -216,3 +216,24 @@ export async function setRecipePublished(
     .eq("id", id);
   return error ? fail(error.message) : ok;
 }
+
+/**
+ * Sets the teaching order of the lesson list.
+ *
+ * Recipes default to sort_order 0, so without this every lesson ties and the
+ * library falls back to alphabetical — which is not the order a Cookery module
+ * is taught in.
+ */
+export async function reorderRecipes(
+  supabase: Client,
+  orderedIds: string[],
+): Promise<MutationResult> {
+  for (const [index, id] of orderedIds.entries()) {
+    const { error } = await supabase
+      .from("recipes")
+      .update({ sort_order: index + 1 })
+      .eq("id", id);
+    if (error) return fail(error.message);
+  }
+  return ok;
+}

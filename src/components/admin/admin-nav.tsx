@@ -2,13 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ChartColumn, GraduationCap, LayoutGrid, Users } from "lucide-react";
+import {
+  BookOpen,
+  ChartColumn,
+  GraduationCap,
+  LayoutGrid,
+  Tags,
+  Users,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/admin", label: "Overview", icon: LayoutGrid, exact: true },
   { href: "/admin/recipes", label: "Recipes", icon: BookOpen, exact: false },
+  { href: "/admin/categories", label: "Categories", icon: Tags, exact: false },
   { href: "/admin/students", label: "Students", icon: Users, exact: false },
   { href: "/admin/sections", label: "Sections", icon: GraduationCap, exact: false },
   { href: "/admin/results", label: "Results", icon: ChartColumn, exact: false },

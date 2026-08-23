@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { KeyRound, UserPlus } from "lucide-react";
 
@@ -163,7 +164,12 @@ function PersonRow({
         <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="truncate font-semibold">{person.full_name}</p>
+              <Link
+                href={`/admin/students/${person.id}`}
+                className="truncate font-semibold underline-offset-4 hover:underline"
+              >
+                {person.full_name}
+              </Link>
               {person.must_change_password && (
                 <Badge variant="outline" className="text-xs">
                   New password pending
@@ -172,6 +178,9 @@ function PersonRow({
             </div>
             <p className="text-muted-foreground truncate text-sm">
               @{person.username} · {sectionLabel}
+            </p>
+            <p className="text-muted-foreground text-xs">
+              Tap the name to see their progress.
             </p>
             {error && <p className="text-destructive text-sm">{error}</p>}
           </div>

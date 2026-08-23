@@ -125,6 +125,19 @@ export async function setRecipePublished(
   return result;
 }
 
+export async function reorderRecipes(orderedIds: string[]): Promise<SaveResult> {
+  await requireStaff();
+  const supabase = await createClient();
+  const result = await recipes.reorderRecipes(supabase, orderedIds);
+
+  if (result.ok) {
+    revalidatePath("/admin/recipes");
+    revalidatePath("/recipes");
+    revalidatePath("/home");
+  }
+  return result;
+}
+
 export async function deleteRecipe(id: string) {
   await requireStaff();
   const supabase = await createClient();

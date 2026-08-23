@@ -2,6 +2,7 @@ import { beforeAll, afterAll, describe, expect, it } from "vitest";
 
 import * as recipes from "@/lib/recipes/mutations";
 import * as quizzes from "@/lib/quizzes/mutations";
+import * as categoriesLib from "@/lib/categories/mutations";
 import type { Client } from "@/lib/recipes/mutations";
 
 import {
@@ -322,5 +323,88 @@ describe("teacher workflow", () => {
     expect(ids).toContain(ordered[0].id);
     expect(ids).toContain(ordered[2].id);
     expect(ids).not.toContain(ordered[1].id);
+  });
+
+  it("orders lessons for the teaching sequence", async () => {
+    const first = await newDraft(`Order A ${run}`);
+    const second = await newDraft(`Order B ${run}`);
+    const third = await newDraft(`Order C ${run}`);
+
+    await recipes.reorderRecipes(teacherDb, [third, first, second]);
+
+    const { data } = await admin
+      .from("recipes")
+      .select("id, sort_order")
+      .in("id", [first, second, third]);
+
+    const byId = new Map((data ?? []).map((r) => [r.id, r.sort_order]));
+    expect(byId.get(third)).toBeLessThan(byId.get(first)!);
+    expect(byId.get(first)).toBeLessThan(byId.get(second)!);
+  });
+
+  it("adds, renames, and removes a category", async () => {
+    const name = `Native Delicacies ${run}`;
+
+    expect((await categoriesLib.createCategory(teacherDb, name)).ok).toBe(true);
+
+    const findIt = async () => {
+      const { data } = await admin
+        .from("categories")
+        .select("id, name")
+        .eq("name", name)
+        .maybeSingle();
+      return data;
+    };
+
+    const created = await findIt();
+    expect(created).toBeTruthy();
+
+    const renamed = `${name} Renamed`;
+    expect((await categoriesLib.renameCategory(teacherDb, created!.id, renamed)).ok).toBe(true);
+
+    const { data: afterRename } = await admin
+      .from("categories")
+      .select("name")
+      .eq("id", created!.id)
+      .single();
+    expect(afterRename!.name).toBe(renamed);
+
+    expect((await categoriesLib.deleteCategory(teacherDb, created!.id)).ok).toBe(true);
+
+    const { data: gone } = await admin
+      .from("categories")
+      .select("id")
+      .eq("id", created!.id)
+      .maybeSingle();
+    expect(gone).toBeNull();
+  });
+
+  it("refuses to delete a category that still has recipes", async () => {
+    const name = `In Use ${run}`;
+    await categoriesLib.createCategory(teacherDb, name);
+
+    const { data: category } = await admin
+      .from("categories")
+      .select("id")
+      .eq("name", name)
+      .single();
+
+    const recipeId = await newDraft(`Uses Category ${run}`);
+    await admin.from("recipes").update({ category_id: category!.id }).eq("id", recipeId);
+
+    const result = await categoriesLib.deleteCategory(teacherDb, category!.id);
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(/Move the 1 recipe/);
+
+    // Still there, so no silent data loss.
+    const { data: stillThere } = await admin
+      .from("categories")
+      .select("id")
+      .eq("id", category!.id)
+      .maybeSingle();
+    expect(stillThere).toBeTruthy();
+
+    await admin.from("recipes").delete().eq("id", recipeId);
+    await admin.from("categories").delete().eq("id", category!.id);
   });
 });
