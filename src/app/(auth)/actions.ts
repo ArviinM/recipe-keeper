@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { loginSchema, registerSchema } from "@/lib/validation/auth";
+import { loginSchema, registerSchema, passwordSchema } from "@/lib/validation/auth";
 
 export type FormState = {
   error?: string;
@@ -147,4 +147,42 @@ export async function signOut() {
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
   redirect("/login");
+}
+
+/**
+ * Also clears must_change_password, which is what releases a pre-created
+ * account from the forced change screen.
+ */
+export async function changePassword(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  const parsed = passwordSchema.safeParse(password);
+  if (!parsed.success) {
+    return { fieldErrors: { password: parsed.error.issues[0].message } };
+  }
+  if (password !== confirmPassword) {
+    return { fieldErrors: { confirmPassword: "The two passwords do not match." } };
+  }
+
+  const supabase = await createClient();
+
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) redirect("/login");
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    return { error: "We could not save that password. Please try again." };
+  }
+
+  await supabase
+    .from("profiles")
+    .update({ must_change_password: false })
+    .eq("id", userData.user.id);
+
+  revalidatePath("/", "layout");
+  redirect("/home");
 }
