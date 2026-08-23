@@ -49,18 +49,21 @@ export type QuizStatus = {
 export async function getQuizStatuses(studentId: string): Promise<QuizStatus[]> {
   const supabase = await createClient();
 
-  const { data: quizzes } = await supabase
-    .from("quizzes")
-    .select("id, title, recipes!inner(title, slug, is_published, sort_order)")
-    .eq("is_published", true)
-    .eq("recipes.is_published", true);
+  // Independent of each other, so they go out together rather than one after
+  // the other — each round trip to the database costs real time.
+  const [{ data: quizzes }, { data: attempts }] = await Promise.all([
+    supabase
+      .from("quizzes")
+      .select("id, title, recipes!inner(title, slug, is_published, sort_order)")
+      .eq("is_published", true)
+      .eq("recipes.is_published", true),
+    supabase
+      .from("attempts")
+      .select("quiz_id, score, total_items, percentage, passed")
+      .eq("student_id", studentId),
+  ]);
 
   if (!quizzes?.length) return [];
-
-  const { data: attempts } = await supabase
-    .from("attempts")
-    .select("quiz_id, score, total_items, percentage, passed")
-    .eq("student_id", studentId);
 
   const best = new Map<string, { pct: number; score: number; total: number; passed: boolean; count: number }>();
   for (const attempt of attempts ?? []) {

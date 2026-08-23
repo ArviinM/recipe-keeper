@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -17,8 +18,14 @@ export type CurrentUser = {
   locale: Locale;
 };
 
-/** The signed-in user's profile, or null when signed out. */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+/**
+ * The signed-in user's profile, or null when signed out.
+ *
+ * Wrapped in React's cache so the layout and the page it renders share one
+ * result. Without it every authenticated page paid for two auth checks and two
+ * profile reads, and each of those is a round trip to Singapore.
+ */
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<CurrentUser | null> {
   const supabase = await createClient();
 
   const {
@@ -53,7 +60,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     mustChangePassword: profile.must_change_password,
     locale,
   };
-}
+});
 
 /** Use in any page that requires a signed-in user. */
 export async function requireUser(): Promise<CurrentUser> {
