@@ -173,6 +173,38 @@ writing the policies — a table with RLS and no policy denies everyone.
 
 ---
 
+## Offline
+
+`public/sw.js` keeps already-opened lessons readable when the connection drops.
+
+What it caches is deliberately narrow, because these are shared classroom
+phones:
+
+| Cached | Never cached |
+|---|---|
+| `/recipes/[slug]` lesson pages | `/home`, `/progress`, `/profile`, `/quiz` |
+| `/_next/static/*` build output | the whole `/admin` dashboard |
+| recipe photos from Storage | `/api/*`, `/login`, `/register` |
+
+Reaching the sign-in screen posts `clear-caches` to the worker, so one student's
+lesson does not sit on the phone for the next one. Bump `VERSION` in `sw.js`
+when the cached shape changes — old caches are dropped on activate.
+
+Anything added to `NEVER_CACHE` must also be reflected here.
+
+---
+
+## Documentation
+
+- `docs/user-manual.md` — written for the teacher, doubles as a manuscript
+  appendix. Screenshots live in `docs/images/`.
+- `docs/database-design.md` — ERD generated from the live schema. Regenerate it
+  rather than hand-editing, so it cannot drift.
+
+`docs/system-development-guide.*` stays gitignored; see the top of this file.
+
+---
+
 ## Operational notes
 
 - **Supabase free-tier projects pause after ~7 days idle.** A keep-alive cron must stay
