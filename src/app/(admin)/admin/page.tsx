@@ -84,9 +84,14 @@ export default async function AdminOverviewPage() {
               your first lesson — you can save as you go and publish only when
               you are happy with it.
             </p>
-            <Button asChild className="font-bold">
-              <Link href="/admin/recipes">Go to Recipes</Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild className="font-bold">
+                <Link href="/admin/recipes">Go to Recipes</Link>
+              </Button>
+              <Button asChild variant="outline" className="font-bold">
+                <Link href="/admin/guide">Read the guide</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

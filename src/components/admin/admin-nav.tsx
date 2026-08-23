@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   ChartColumn,
+  CircleHelp,
   GraduationCap,
   LayoutGrid,
   Tags,
@@ -20,6 +21,7 @@ const LINKS = [
   { href: "/admin/students", label: "Students", icon: Users, exact: false },
   { href: "/admin/sections", label: "Sections", icon: GraduationCap, exact: false },
   { href: "/admin/results", label: "Results", icon: ChartColumn, exact: false },
+  { href: "/admin/guide", label: "Guide", icon: CircleHelp, exact: false },
 ] as const;
 
 function useIsActive() {
