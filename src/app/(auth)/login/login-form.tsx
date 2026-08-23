@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 
 import { signIn, type FormState } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,15 @@ const initialState: FormState = {};
 
 export function LoginForm({ next }: { next: string }) {
   const [state, formAction] = useActionState(signIn, initialState);
+
+  // Reaching the sign-in screen means the previous session is over. Wipe the
+  // offline cache so a lesson opened by one student is not left sitting on a
+  // shared classroom phone for the next one.
+  useEffect(() => {
+    navigator.serviceWorker?.ready
+      .then((registration) => registration.active?.postMessage("clear-caches"))
+      .catch(() => {});
+  }, []);
 
   return (
     <Card className="border-border/70 shadow-sm">

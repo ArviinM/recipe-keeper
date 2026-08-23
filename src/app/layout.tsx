@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 
+import { ServiceWorkerRegistrar } from "@/components/service-worker";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="bg-background text-foreground flex min-h-full flex-col">
         {children}
         <Toaster position="top-center" richColors />
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
