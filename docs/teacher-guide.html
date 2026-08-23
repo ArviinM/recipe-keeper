@@ -1,0 +1,668 @@
+<title>Recipe Keeper Teacher's Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --paper:      #FDFCFA;
+    --surface:    #FFFFFF;
+    --sunk:       #F6F2EE;
+    --ink:        #2E2226;
+    --ink-soft:   #6B5B5F;
+    --ink-faint:  #9B8C90;
+    --rose:       #B84E64;
+    --rose-deep:  #92384C;
+    --blush:      #FBEFF1;
+    --leaf:       #4A7022;
+    --leaf-soft:  #EFF5E6;
+    --wood:       #B98F4F;
+    --amber-bg:   #FBF3E4;
+    --rule:       #E8DFDB;
+    --shadow:     0 1px 2px rgba(46,34,38,.05), 0 8px 24px -12px rgba(46,34,38,.14);
+
+    --step-max: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #1B1618;
+      --surface:   #241E21;
+      --sunk:      #2C2427;
+      --ink:       #F2EBEC;
+      --ink-soft:  #B9A9AD;
+      --ink-faint: #8A797E;
+      --rose:      #E9899B;
+      --rose-deep: #F2A9B7;
+      --blush:     #352429;
+      --leaf:      #A8D073;
+      --leaf-soft: #26301C;
+      --wood:      #D9B071;
+      --amber-bg:  #332813;
+      --rule:      #3A3033;
+      --shadow:    0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:     #1B1618;
+    --surface:   #241E21;
+    --sunk:      #2C2427;
+    --ink:       #F2EBEC;
+    --ink-soft:  #B9A9AD;
+    --ink-faint: #8A797E;
+    --rose:      #E9899B;
+    --rose-deep: #F2A9B7;
+    --blush:     #352429;
+    --leaf:      #A8D073;
+    --leaf-soft: #26301C;
+    --wood:      #D9B071;
+    --amber-bg:  #332813;
+    --rule:      #3A3033;
+    --shadow:    0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Nunito, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: Fraunces, ui-serif, Georgia, "Times New Roman", serif;
+    text-wrap: balance;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  a { color: var(--rose-deep); }
+  a:focus-visible, button:focus-visible {
+    outline: 2.5px solid var(--rose);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  code, kbd, .mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .9em;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    background: var(--surface);
+    border-bottom: 1px solid var(--rule);
+  }
+  .masthead-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 28px;
+  }
+  .wordmark {
+    font-family: Fraunces, serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -.01em;
+  }
+  .wordmark .a { color: var(--rose); }
+  .wordmark .b { color: var(--leaf); }
+  .masthead h1 {
+    font-size: clamp(1.9rem, 1.3rem + 2.4vw, 2.9rem);
+    font-weight: 600;
+    width: 100%;
+    margin-top: 2px;
+  }
+  .masthead p {
+    margin: 0;
+    color: var(--ink-soft);
+    max-width: var(--step-max);
+  }
+  .addressbar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 9px 14px;
+    background: var(--sunk);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: .93rem;
+  }
+  .addressbar .label {
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    font-size: .68rem;
+    font-weight: 800;
+  }
+
+  /* ---------- shell ---------- */
+  .shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  }
+
+  /* ---------- jump nav ---------- */
+  .jump {
+    position: sticky;
+    top: 24px;
+    padding-top: 40px;
+  }
+  .jump h2 {
+    font-family: Nunito, sans-serif;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 12px;
+  }
+  .jump ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    counter-reset: j;
+  }
+  .jump a {
+    display: flex;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: .92rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .jump a:hover { background: var(--sunk); color: var(--ink); }
+  .jump a .n {
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    min-width: 1.1em;
+  }
+  @media (max-width: 900px) {
+    .jump {
+      position: static;
+      padding: 24px 0 0;
+      margin: 0 -24px;
+      overflow-x: auto;
+    }
+    .jump ol { flex-direction: row; width: max-content; padding: 0 24px; gap: 8px; }
+    .jump a { background: var(--sunk); white-space: nowrap; }
+  }
+
+  main { padding-top: 40px; min-width: 0; }
+
+  /* ---------- step blocks ---------- */
+  .step {
+    position: relative;
+    padding: 0 0 44px 0;
+    scroll-margin-top: 20px;
+  }
+  .step-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .step-num {
+    flex: none;
+    font-family: Fraunces, serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--rose);
+    background: var(--blush);
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-variant-numeric: tabular-nums;
+    align-self: center;
+  }
+  .step h2 {
+    font-size: clamp(1.35rem, 1.1rem + 1vw, 1.72rem);
+    font-weight: 600;
+  }
+  .lede {
+    color: var(--ink-soft);
+    max-width: var(--step-max);
+    margin: 0 0 18px 0;
+  }
+  .step > .body { max-width: var(--step-max); }
+  .step p { max-width: var(--step-max); }
+
+  ol.do, ul.plain {
+    max-width: var(--step-max);
+    padding-left: 0;
+    list-style: none;
+    margin: 18px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  ol.do { counter-reset: d; }
+  ol.do > li {
+    counter-increment: d;
+    position: relative;
+    padding-left: 38px;
+  }
+  ol.do > li::before {
+    content: counter(d);
+    position: absolute;
+    left: 0;
+    top: .12em;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--sunk);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: .78rem;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  ul.plain > li { position: relative; padding-left: 38px; }
+  ul.plain > li::before {
+    content: "";
+    position: absolute;
+    left: 9px; top: .62em;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--wood);
+  }
+
+  .ui {
+    font-weight: 800;
+    color: var(--ink);
+    background: var(--sunk);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: .88em;
+    white-space: nowrap;
+  }
+
+  /* ---------- callouts ---------- */
+  .note {
+    max-width: var(--step-max);
+    margin: 20px 0;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--wood);
+    box-shadow: var(--shadow);
+  }
+  .note.warn { border-left-color: var(--rose); background: var(--blush); }
+  .note.good { border-left-color: var(--leaf); background: var(--leaf-soft); }
+  .note.arvin { border-left-color: var(--wood); background: var(--amber-bg); }
+  .note h3 {
+    font-family: Nunito, sans-serif;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .note p { margin: 0; }
+  .note p + p { margin-top: 10px; }
+
+  pre {
+    max-width: var(--step-max);
+    margin: 16px 0;
+    padding: 15px 17px;
+    background: var(--sunk);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: .88rem;
+    line-height: 1.55;
+  }
+  pre code { font-size: 1em; }
+
+  /* ---------- tables ---------- */
+  .tablewrap {
+    max-width: var(--step-max);
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    margin: 20px 0;
+    background: var(--surface);
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: .94rem; }
+  th, td { text-align: left; padding: 12px 15px; vertical-align: top; }
+  thead th {
+    background: var(--sunk);
+    font-size: .7rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 800;
+  }
+  tbody tr + tr { border-top: 1px solid var(--rule); }
+  td strong { color: var(--ink); }
+
+  /* ---------- wizard strip ---------- */
+  .wizard {
+    max-width: var(--step-max);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 18px 0 22px;
+  }
+  .wizard span {
+    font-size: .8rem;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--sunk);
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+  }
+  .wizard span.on { background: var(--rose); border-color: var(--rose); color: #fff; }
+
+  hr.sep {
+    max-width: var(--step-max);
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin: 8px 0 40px;
+  }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .footer-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 24px 40px;
+    color: var(--ink-soft);
+    font-size: .93rem;
+  }
+
+  @media print {
+    .jump { display: none; }
+    .shell { grid-template-columns: 1fr; }
+    body { font-size: 11.5pt; }
+    .step { page-break-inside: avoid; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div style="width:100%">
+      <div class="wordmark"><span class="a">Recipe</span> <span class="b">Keeper</span></div>
+      <h1>Teacher's Guide</h1>
+    </div>
+    <div style="width:100%">
+      <p>Everything you need to set up the Cookery module and run it with your class. Work through it in order — each part depends on the one before it.</p>
+      <div class="addressbar">
+        <span class="label">Open at</span>
+        <span class="mono">recipe-keeper-delta.vercel.app</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="jump" aria-label="Contents">
+    <h2>Steps</h2>
+    <ol>
+      <li><a href="#signin"><span class="n">1</span> Sign in</a></li>
+      <li><a href="#sections"><span class="n">2</span> Add your sections</a></li>
+      <li><a href="#students"><span class="n">3</span> Add your students</a></li>
+      <li><a href="#lesson"><span class="n">4</span> Write a lesson</a></li>
+      <li><a href="#quiz"><span class="n">5</span> Build the quiz</a></li>
+      <li><a href="#publish"><span class="n">6</span> Publish it</a></li>
+      <li><a href="#tagalog"><span class="n">7</span> Add Tagalog</a></li>
+      <li><a href="#results"><span class="n">8</span> Check results</a></li>
+      <li><a href="#stuck"><span class="n">?</span> If you get stuck</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <div class="note arvin">
+      <h3>Read this first</h3>
+      <p><strong>Your account must already exist before you can do anything else.</strong> Arvin creates it for you and sends you a username and a temporary password. If you don't have those yet, message him — there is no way to create the first account from inside the app.</p>
+      <p>Once you're signed in, you can do everything else on this page yourself.</p>
+    </div>
+
+    <section class="step" id="signin">
+      <div class="step-head"><span class="step-num">1</span><h2>Sign in and pick your password</h2></div>
+      <p class="lede">You'll only do this once.</p>
+      <div class="body">
+        <ol class="do">
+          <li>Go to <span class="mono">recipe-keeper-delta.vercel.app</span> and tap <span class="ui">Get Started</span>.</li>
+          <li>Enter the username and temporary password Arvin gave you, then tap <span class="ui">Sign In</span>.</li>
+          <li>You'll be asked to choose your own password straight away. Pick something you'll remember — at least 8 characters.</li>
+        </ol>
+        <p>You'll land on the <strong>Teacher Dashboard</strong>. Along the side (or across the top on a phone) you'll see <span class="ui">Overview</span>, <span class="ui">Recipes</span>, <span class="ui">Categories</span>, <span class="ui">Students</span>, <span class="ui">Sections</span> and <span class="ui">Results</span>.</p>
+        <div class="note good">
+          <h3>Use a laptop for setup</h3>
+          <p>Everything works on a phone, including this dashboard. But you'll be doing a lot of typing while writing recipes, so a laptop is far more comfortable. Your students will use phones.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="sections">
+      <div class="step-head"><span class="step-num">2</span><h2>Add your class sections</h2></div>
+      <p class="lede">Do this before adding students — students pick their section when they register, so the sections have to exist first.</p>
+      <div class="body">
+        <ol class="do">
+          <li>Open <span class="ui">Sections</span> and tap <span class="ui">Add section</span>.</li>
+          <li>Set the grade (9), the section name — for example <em>Sampaguita</em> — and the school year.</li>
+          <li>Choose the <strong>Language</strong> for that section: English or Tagalog.</li>
+          <li>Tap <span class="ui">Save</span>. Repeat for each section you teach.</li>
+        </ol>
+        <div class="note warn">
+          <h3>The language setting matters for your research</h3>
+          <p>Language is set <strong>per section</strong>, so a whole class reads the same one. That's deliberate: if some students read English and others Tagalog within the same group, the language becomes an extra variable and your panel can question whether the improvement came from the module or the language.</p>
+          <p>Keep one language per group unless you're comparing languages on purpose.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="students">
+      <div class="step-head"><span class="step-num">3</span><h2>Add your students</h2></div>
+      <p class="lede">Two ways to do this. Creating the accounts yourself is usually easier with a whole class.</p>
+      <div class="body">
+        <ol class="do">
+          <li>Open <span class="ui">Students</span> and tap <span class="ui">Add account</span>.</li>
+          <li>Fill in the student's full name, email, username, and section.</li>
+          <li>Tap <span class="ui">Create account</span>.</li>
+        </ol>
+        <div class="note warn">
+          <h3>Write the temporary password down immediately</h3>
+          <p>A password like <span class="mono">Adobo4821</span> appears on screen. <strong>It's shown once and never again.</strong> Write it down or hand it to the student before you close that box.</p>
+          <p>The student is asked to choose their own password the first time they sign in, so you never need to know it afterwards.</p>
+        </div>
+        <p>The other option: students register themselves at the same address by tapping <span class="ui">Create an account</span>. They'll need to pick their section from a list — which is why step 2 comes first.</p>
+        <p><strong>When a student forgets their password:</strong> open <span class="ui">Students</span>, find their name, tap <span class="ui">Reset password</span>, and give them the new temporary one. You can't see their existing password, and you don't need to.</p>
+        <p>Tap any student's <strong>name</strong> to see their progress, their best score on each lesson, and every attempt they've made.</p>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="lesson">
+      <div class="step-head"><span class="step-num">4</span><h2>Write a lesson</h2></div>
+      <p class="lede">This is where most of your time goes. Open <span class="ui">Recipes</span> and tap <span class="ui">New Recipe</span>.</p>
+      <div class="body">
+        <div class="wizard">
+          <span class="on">1 Basics</span><span>2 Objectives</span><span>3 Ingredients</span><span>4 Procedure</span><span>5 Techniques &amp; Safety</span><span>6 Quiz</span><span>7 Publish</span>
+        </div>
+
+        <div class="note good">
+          <h3>There is no Save button — and that's fine</h3>
+          <p>Everything saves by itself as you type. You'll see <strong>Saved automatically</strong> at the top right. You can close the page mid-sentence, come back tomorrow, and nothing is lost.</p>
+          <p>You can also jump between the seven steps in any order using the numbered buttons, so it's fine to leave a section half-finished and return to it.</p>
+        </div>
+
+        <h3 style="font-size:1.05rem;margin:26px 0 4px">1 · Basics</h3>
+        <p>Recipe name, category, a short description, and a photo of the finished dish. Difficulty, servings and timings are optional.</p>
+        <p>If you have a video, upload it to YouTube first and set it to <strong>Unlisted</strong> — that means only people with the link can watch it — then paste the link here.</p>
+
+        <h3 style="font-size:1.05rem;margin:26px 0 4px">2 · Objectives</h3>
+        <p>What students should be able to do afterwards. They see these as <em>"After this lesson, you should be able to…"</em>. One per line.</p>
+
+        <h3 style="font-size:1.05rem;margin:26px 0 4px">3 · Ingredients</h3>
+        <p>The measurement and the ingredient go in <strong>separate boxes</strong> — <span class="mono">1 kg</span> and <span class="mono">chicken</span> — so students see them clearly. The third box is for a note like <em>cut into serving pieces</em>.</p>
+
+        <h3 style="font-size:1.05rem;margin:26px 0 4px">4 · Procedure</h3>
+        <p>One step at a time. Steps are numbered automatically, so if you reorder them with the arrows the numbers fix themselves. Each step can have its own photo.</p>
+
+        <h3 style="font-size:1.05rem;margin:26px 0 4px">5 · Techniques &amp; Safety</h3>
+        <p>Tick the cooking techniques this recipe uses. The explanations are written once and shared by every recipe, so you never retype them.</p>
+        <p>Then write the kitchen safety reminders and your chef's tips. <strong>Students see the safety section highlighted in red</strong>, before they start cooking.</p>
+
+        <div class="note">
+          <h3>Photos</h3>
+          <p>Use your own photos of the dishes wherever you can. Images taken from the internet can cause copyright problems in a published research module, and your own photos make the paper stronger.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="quiz">
+      <div class="step-head"><span class="step-num">5</span><h2>Build the quiz</h2></div>
+      <p class="lede">Step 6 of the recipe. Students take it after finishing the lesson, and it's scored automatically.</p>
+      <div class="body">
+        <ol class="do">
+          <li>Write the question.</li>
+          <li>Fill in the four choices.</li>
+          <li><strong>Tap the letter of the correct answer</strong> so it turns green. This is the step people forget.</li>
+          <li>Tap <span class="ui">Add another question</span> and repeat.</li>
+        </ol>
+
+        <div class="note warn">
+          <h3>Leave "Show correct answers after submitting" switched OFF</h3>
+          <p>It's off by default and it should stay off while your study is running. If students can see the answer key, they can share it — and the scores stop measuring what they actually learned, which is the thing your research is about.</p>
+        </div>
+
+        <p>The second switch, <span class="ui">Quiz is available to students</span>, is what makes the quiz appear. Turn it on once every question has a correct answer marked.</p>
+        <p><strong>You can edit a question later without losing data.</strong> Fixing a typo keeps the answers students have already given. Only deleting a question removes its answers.</p>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="publish">
+      <div class="step-head"><span class="step-num">6</span><h2>Publish it</h2></div>
+      <p class="lede">Until you publish, students cannot see the lesson at all.</p>
+      <div class="body">
+        <p>Step 7 shows a checklist of what's still missing:</p>
+        <ul class="plain">
+          <li>Recipe has a name</li>
+          <li>Short description written</li>
+          <li>Photo of the dish added</li>
+          <li>Learning objectives written</li>
+          <li>Ingredients listed</li>
+          <li>Procedure written</li>
+          <li>Safety reminders written</li>
+          <li>Quiz questions with a correct answer</li>
+        </ul>
+        <p>When you're ready, tap <span class="ui">Publish for students</span>. Nothing here is permanent — you can unpublish at any time, and <span class="ui">View as a student</span> shows you exactly what they'll see.</p>
+        <p>Back on the <span class="ui">Recipes</span> list, use the <strong>up and down arrows</strong> to put your lessons in teaching order. Students see them in that order.</p>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="tagalog">
+      <div class="step-head"><span class="step-num">7</span><h2>Add Tagalog (optional)</h2></div>
+      <p class="lede">Only if the section you're teaching is set to Tagalog.</p>
+      <div class="body">
+        <div class="note warn">
+          <h3>Write English first</h3>
+          <p>English is what students fall back to when a translation is missing, so fill it in before you translate. If you skip a Tagalog field, students simply see the English version of that line — never a blank.</p>
+        </div>
+        <ol class="do">
+          <li>Open the recipe and find <span class="ui">Writing in</span> at the top.</li>
+          <li>Switch it to <strong>Tagalog</strong>. The fields swap to the Tagalog versions.</li>
+          <li>Translate what you want, then switch back to English whenever you like.</li>
+        </ol>
+        <p>While you're writing in Tagalog, the buttons for adding, removing and reordering are hidden, and you can't change the correct answer. That's on purpose — translating only replaces words, so it can never accidentally change the structure of a lesson or the answer key.</p>
+        <p>The <strong>Chicken Adobo</strong> lesson is already translated as an example of the register to write in.</p>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="results">
+      <div class="step-head"><span class="step-num">8</span><h2>Check results</h2></div>
+      <p class="lede">Open <span class="ui">Results</span>.</p>
+      <div class="body">
+        <p>Each row is a student's <strong>best score</strong> on one lesson, with how many attempts they made. Retakes are encouraged — the best score counts, but every single attempt is stored.</p>
+        <div class="note good">
+          <h3>For your manuscript</h3>
+          <p><span class="ui">Download CSV</span> gives you a spreadsheet of <strong>every attempt</strong>, not just the best one, with dates and attempt numbers. That's the file to use for the statistical analysis in your paper — you won't have to retype anything.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <section class="step" id="stuck">
+      <div class="step-head"><span class="step-num">?</span><h2>If you get stuck</h2></div>
+      <div class="body">
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>What's happening</th><th>What to do</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>A student can't sign in</strong></td><td>Check the username in <span class="ui">Students</span> — it's easy to mistype. If it's the password, tap <span class="ui">Reset password</span>.</td></tr>
+              <tr><td><strong>A student can't see a lesson</strong></td><td>It's still a draft. Open it and check step 7, <span class="ui">Publish</span>.</td></tr>
+              <tr><td><strong>The lesson shows but there's no quiz</strong></td><td>The quiz has its own switch. Step 6, turn on <span class="ui">Quiz is available to students</span>.</td></tr>
+              <tr><td><strong>A student sees English in a Tagalog class</strong></td><td>That line hasn't been translated yet. Open the recipe, switch <span class="ui">Writing in</span> to Tagalog, and fill it in.</td></tr>
+              <tr><td><strong>I can't delete a category</strong></td><td>Recipes are still using it. Move them to another category first.</td></tr>
+              <tr><td><strong>The first page is slow to open</strong></td><td>Normal after a quiet period — the server wakes up. Open the app a minute before a class or a demo and it'll be quick.</td></tr>
+              <tr><td><strong>I made a mistake and published it</strong></td><td>Nothing is permanent. Open the recipe, step 7, and tap <span class="ui">Unpublish</span>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note arvin">
+          <h3>Things only Arvin can do</h3>
+          <p>Save these up rather than getting stuck: creating the very first account for a new teacher, changing the app's name or the school name shown on the opening screen, and anything that needs a code change.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    Recipe Keeper — Mobile-Based Recipe Module for Grade 9 Cookery.
+    Students install it by opening the address in a phone browser and choosing <strong>Add to Home Screen</strong>.
+  </div>
+</footer>
