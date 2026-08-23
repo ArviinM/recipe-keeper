@@ -1,5 +1,4 @@
 import { defineConfig } from "vitest/config";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { config } from "dotenv";
 
 // Integration tests talk to the real Supabase project, so they need the same
@@ -7,7 +6,7 @@ import { config } from "dotenv";
 config({ path: ".env.local", quiet: true });
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  resolve: { tsconfigPaths: true },
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
