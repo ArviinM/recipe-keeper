@@ -29,7 +29,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "role, full_name, username, section_id, must_change_password, locale, sections(default_locale)",
+      // The relationship must be named: profiles and sections reference each
+      // other twice (a student's section, and a teacher advising a section), so
+      // a bare sections(...) embed is ambiguous and PostgREST rejects it.
+      "role, full_name, username, section_id, must_change_password, locale, sections!profiles_section_id_fkey(default_locale)",
     )
     .eq("id", user.id)
     .single();
