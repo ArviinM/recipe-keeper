@@ -42,7 +42,7 @@ describe("profile query used by getCurrentUser", () => {
       .order("role");
 
     expect(error).toBeNull();
-    for (const row of (data ?? []) as { sections: unknown }[]) {
+    for (const row of (data ?? []) as unknown as { sections: unknown }[]) {
       // Never throws on a profile with no section; the app falls back to "en".
       expect(row.sections === null || typeof row.sections === "object").toBe(true);
     }
