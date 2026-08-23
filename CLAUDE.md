@@ -133,6 +133,31 @@ you do not know to look for it.
 
 ---
 
+## Deployment
+
+| | |
+|---|---|
+| Production | https://recipe-keeper-delta.vercel.app |
+| Vercel project | `arvin-medinas-projects/recipe-keeper` |
+
+The `*-arvin-medinas-projects.vercel.app` alias sits behind Vercel's login wall.
+Only the `recipe-keeper-delta.vercel.app` URL is reachable by students — never
+hand out the other one.
+
+`/api/keep-alive` is listed in the proxy's PUBLIC_PATHS. Vercel's cron calls it
+with no session, and without that entry it was redirected to `/login`, which
+would have let the database pause anyway. It authenticates with `CRON_SECRET`.
+
+### First administrator
+
+Only staff can create staff, so the first admin is made from the command line:
+
+```bash
+./scripts/create-admin.sh "Full Name" email@example.com username
+```
+
+---
+
 ## Supabase project
 
 | | |

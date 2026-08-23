@@ -4,8 +4,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
 import type { Database } from "@/lib/database.types";
 
-/** Routes a signed-out visitor may reach. */
-const PUBLIC_PATHS = ["/", "/login", "/register", "/offline"];
+/**
+ * Routes a signed-out visitor may reach.
+ *
+ * /api/keep-alive is here because Vercel's cron calls it with no session: left
+ * out, it was redirected to /login and the weekly ping never ran, which would
+ * have let the free-tier database pause before the defense. The route
+ * authenticates itself with CRON_SECRET.
+ */
+const PUBLIC_PATHS = ["/", "/login", "/register", "/offline", "/api/keep-alive"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.includes(pathname);

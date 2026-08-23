@@ -36,6 +36,12 @@ policy, so a result row cannot be forged from a client.
 These boundaries are covered by integration tests that authenticate as a real
 student and try to break them.
 
+## Live
+
+https://recipe-keeper-delta.vercel.app
+
+On a phone, open that link and choose **Add to Home Screen** to install it.
+
 ## Getting started
 
 ```bash
