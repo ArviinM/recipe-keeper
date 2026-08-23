@@ -214,6 +214,32 @@ the ambiguous form still fails.
 
 ---
 
+## ⚡ Performance
+
+**The functions must run in `sin1`.** `vercel.json` pins the region.
+
+Vercel defaults to `iad1` (Washington DC) while Supabase is in
+`ap-southeast-1` (Singapore). Every query then crosses the Pacific — about
+250ms each, several times per page, mostly in sequence. Pages took 1.7 to 2.9
+seconds. Moving the functions to Singapore put them beside both the database and
+the students, and the same pages now respond in 177–249ms.
+
+If pages ever feel slow again, check the region before anything else.
+
+Two smaller rules that follow from the same principle — a round trip is
+expensive, so make as few as possible:
+
+- `getCurrentUser()` is wrapped in React's `cache()`. A layout and the page it
+  renders both call it; without the cache each page paid for two auth checks and
+  two profile reads.
+- Independent queries go out together with `Promise.all`, never one after the
+  other.
+
+Images are already lazy: `next/image` defaults to it, and only the splash logo
+and the lesson hero set `priority`, both being above the fold.
+
+---
+
 ## Offline
 
 `public/sw.js` keeps already-opened lessons readable when the connection drops.
