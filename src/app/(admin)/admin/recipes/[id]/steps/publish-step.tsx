@@ -34,12 +34,17 @@ export function PublishStep({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // The checklist follows the English content, which is what a lesson is
+  // written in. Tagalog is an optional translation on top of it.
   const answeredQuestions = recipe.quiz.questions.filter(
     (q) => q.prompt.trim() && q.correctLabel,
   ).length;
 
   const checks = [
-    { label: "Recipe has a name", done: recipe.title !== "Untitled recipe" && Boolean(recipe.title.trim()) },
+    {
+      label: "Recipe has a name",
+      done: recipe.title !== "Untitled recipe" && Boolean(recipe.title.trim()),
+    },
     { label: "Short description written", done: Boolean(recipe.description.trim()) },
     { label: "Photo of the dish added", done: Boolean(recipe.imagePath) },
     { label: "Learning objectives written", done: recipe.objectives.length > 0 },

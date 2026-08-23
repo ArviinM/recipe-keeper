@@ -18,16 +18,24 @@ export function ObjectivesStep({
   recipe: WizardRecipe;
   editLocale: Locale;
 }) {
-  const source =
-    editLocale === "tl" ? recipe.tl.objectives : recipe.objectives;
-  const [items, setItems] = useState(source.length ? source : [""]);
+  const tagalog = editLocale === "tl";
+  const [both, setBoth] = useState({
+    en: recipe.objectives.length ? recipe.objectives : [""],
+    tl: recipe.objectivesTl.length ? recipe.objectivesTl : [""],
+  });
+  const items = tagalog ? both.tl : both.en;
+  const setItems = (next: string[]) =>
+    setBoth((prev) => ({ ...prev, [tagalog ? "tl" : "en"]: next }));
 
   const save = useCallback(
-    (current: string[]) =>
-      saveRecipeLists(recipe.id, { objectives: current }, editLocale),
-    [recipe.id, editLocale],
+    (current: { en: string[]; tl: string[] }) =>
+      saveRecipeLists(recipe.id, {
+        objectives: current.en,
+        objectivesTl: current.tl,
+      }),
+    [recipe.id],
   );
-  const { status, error } = useAutosave(items, save);
+  const { status, error } = useAutosave(both, save);
 
   return (
     <div className="space-y-5">

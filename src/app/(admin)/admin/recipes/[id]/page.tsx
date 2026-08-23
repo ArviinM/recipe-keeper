@@ -43,13 +43,19 @@ export default async function EditRecipePage({
 
   const quiz = recipe.quizzes;
 
+  const quizQuestions = [...(quiz?.questions ?? [])].sort(
+    (a, b) => a.sort_order - b.sort_order,
+  );
+
   return (
     <RecipeWizard
       recipe={{
         id: recipe.id,
-        title: recipe.title,
+        title: recipe.title ?? "",
+        titleTl: recipe.title_tl ?? "",
         slug: recipe.slug,
-        description: recipe.description,
+        description: recipe.description ?? "",
+        descriptionTl: recipe.description_tl ?? "",
         imagePath: recipe.image_path,
         videoUrl: recipe.video_url,
         categoryId: recipe.category_id,
@@ -59,55 +65,28 @@ export default async function EditRecipePage({
         cookMinutes: recipe.cook_minutes,
         isPublished: recipe.is_published,
         objectives: recipe.objectives ?? [],
+        objectivesTl: recipe.objectives_tl ?? [],
         safetyNotes: recipe.safety_notes ?? [],
+        safetyNotesTl: recipe.safety_notes_tl ?? [],
         chefTips: recipe.chef_tips ?? [],
-        tl: {
-          title: recipe.title_tl ?? "",
-          description: recipe.description_tl ?? "",
-          objectives: recipe.objectives_tl ?? [],
-          safetyNotes: recipe.safety_notes_tl ?? [],
-          chefTips: recipe.chef_tips_tl ?? [],
-          ingredients: [...(recipe.ingredients ?? [])]
-            .sort((a, b) => a.sort_order - b.sort_order)
-            .map((row) => ({
-              quantity: row.quantity_tl ?? "",
-              item: row.item_tl ?? "",
-              note: row.note_tl ?? "",
-            })),
-          steps: [...(recipe.steps ?? [])]
-            .sort((a, b) => a.step_number - b.step_number)
-            .map((row) => ({
-              instruction: row.instruction_tl ?? "",
-              imagePath: row.image_path,
-            })),
-          quizTitle: quiz?.title_tl ?? "",
-          quizInstructions: quiz?.instructions_tl ?? "",
-          questions: [...(quiz?.questions ?? [])]
-            .sort((a, b) => a.sort_order - b.sort_order)
-            .map((question) => ({
-              id: question.id,
-              prompt: question.prompt_tl ?? "",
-              explanation: question.explanation_tl ?? "",
-              correctLabel: "",
-              choices: ["A", "B", "C", "D"].map((label) => {
-                const match = [...(question.choices ?? [])].find(
-                  (c) => c.label === label,
-                );
-                return { id: match?.id ?? null, label, body: match?.body_tl ?? "" };
-              }),
-            })),
-        },
+        chefTipsTl: recipe.chef_tips_tl ?? [],
         ingredients: [...(recipe.ingredients ?? [])]
           .sort((a, b) => a.sort_order - b.sort_order)
           .map((row) => ({
+            id: row.id,
             quantity: row.quantity ?? "",
-            item: row.item,
+            item: row.item ?? "",
             note: row.note ?? "",
+            quantityTl: row.quantity_tl ?? "",
+            itemTl: row.item_tl ?? "",
+            noteTl: row.note_tl ?? "",
           })),
         steps: [...(recipe.steps ?? [])]
           .sort((a, b) => a.step_number - b.step_number)
           .map((row) => ({
-            instruction: row.instruction,
+            id: row.id,
+            instruction: row.instruction ?? "",
+            instructionTl: row.instruction_tl ?? "",
             imagePath: row.image_path,
           })),
         techniqueIds: [...(recipe.recipe_techniques ?? [])]
@@ -115,29 +94,35 @@ export default async function EditRecipePage({
           .map((row) => row.technique_id),
         quiz: {
           title: quiz?.title ?? "Lesson Quiz",
+          titleTl: quiz?.title_tl ?? "",
           instructions: quiz?.instructions ?? "",
+          instructionsTl: quiz?.instructions_tl ?? "",
           passingPercentage: quiz?.passing_percentage ?? 75,
           revealAnswers: quiz?.reveal_answers ?? false,
           isPublished: quiz?.is_published ?? false,
-          questions: [...(quiz?.questions ?? [])]
-            .sort((a, b) => a.sort_order - b.sort_order)
-            .map((question) => {
-              const choices = [...(question.choices ?? [])].sort(
-                (a, b) => a.sort_order - b.sort_order,
-              );
-              return {
-                id: question.id,
-                prompt: question.prompt,
-                explanation: question.explanation ?? "",
-                correctLabel:
-                  choices.find((c) => c.id === question.correct_choice_id)?.label ??
-                  "",
-                choices: ["A", "B", "C", "D"].map((label) => {
-                  const match = choices.find((c) => c.label === label);
-                  return { id: match?.id ?? null, label, body: match?.body ?? "" };
-                }),
-              };
-            }),
+          questions: quizQuestions.map((question) => {
+            const choices = [...(question.choices ?? [])].sort(
+              (a, b) => a.sort_order - b.sort_order,
+            );
+            return {
+              id: question.id,
+              prompt: question.prompt ?? "",
+              promptTl: question.prompt_tl ?? "",
+              explanation: question.explanation ?? "",
+              explanationTl: question.explanation_tl ?? "",
+              correctLabel:
+                choices.find((c) => c.id === question.correct_choice_id)?.label ?? "",
+              choices: ["A", "B", "C", "D"].map((label) => {
+                const match = choices.find((c) => c.label === label);
+                return {
+                  id: match?.id ?? null,
+                  label,
+                  body: match?.body ?? "",
+                  bodyTl: match?.body_tl ?? "",
+                };
+              }),
+            };
+          }),
         },
       }}
       categories={categories ?? []}

@@ -23,14 +23,17 @@ export function NotesStep({
   editLocale: Locale;
 }) {
   const tagalog = editLocale === "tl";
-  const safetySource = tagalog ? recipe.tl.safetyNotes : recipe.safetyNotes;
-  const tipsSource = tagalog ? recipe.tl.chefTips : recipe.chefTips;
 
   const [selected, setSelected] = useState<string[]>(recipe.techniqueIds);
   const [lists, setLists] = useState({
-    safetyNotes: safetySource.length ? safetySource : [""],
-    chefTips: tipsSource.length ? tipsSource : [""],
+    safetyNotes: recipe.safetyNotes.length ? recipe.safetyNotes : [""],
+    safetyNotesTl: recipe.safetyNotesTl.length ? recipe.safetyNotesTl : [""],
+    chefTips: recipe.chefTips.length ? recipe.chefTips : [""],
+    chefTipsTl: recipe.chefTipsTl.length ? recipe.chefTipsTl : [""],
   });
+
+  const safetyKey = tagalog ? "safetyNotesTl" : "safetyNotes";
+  const tipsKey = tagalog ? "chefTipsTl" : "chefTips";
 
   const saveTech = useCallback(
     (current: string[]) => saveTechniques(recipe.id, current),
@@ -38,12 +41,13 @@ export function NotesStep({
   );
   const saveLists = useCallback(
     (current: typeof lists) =>
-      saveRecipeLists(
-        recipe.id,
-        { safetyNotes: current.safetyNotes, chefTips: current.chefTips },
-        editLocale,
-      ),
-    [recipe.id, editLocale],
+      saveRecipeLists(recipe.id, {
+        safetyNotes: current.safetyNotes,
+        safetyNotesTl: current.safetyNotesTl,
+        chefTips: current.chefTips,
+        chefTipsTl: current.chefTipsTl,
+      }),
+    [recipe.id],
   );
 
   const tech = useAutosave(selected, saveTech);
@@ -107,8 +111,8 @@ export function NotesStep({
         </Card>
 
         <ListEditor
-          items={lists.safetyNotes}
-          onChange={(next) => setLists((prev) => ({ ...prev, safetyNotes: next }))}
+          items={lists[safetyKey]}
+          onChange={(next) => setLists((prev) => ({ ...prev, [safetyKey]: next }))}
           addLabel="Add another safety reminder"
           placeholder="e.g. Wash your hands with soap and water before handling food."
         />
@@ -117,8 +121,8 @@ export function NotesStep({
       <section className="space-y-4">
         <h2 className="text-lg font-bold">Chef&apos;s tips</h2>
         <ListEditor
-          items={lists.chefTips}
-          onChange={(next) => setLists((prev) => ({ ...prev, chefTips: next }))}
+          items={lists[tipsKey]}
+          onChange={(next) => setLists((prev) => ({ ...prev, [tipsKey]: next }))}
           addLabel="Add another tip"
           placeholder="e.g. Make sure the pan is properly heated before adding the ingredients."
         />

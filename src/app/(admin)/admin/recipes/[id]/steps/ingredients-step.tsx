@@ -9,13 +9,21 @@ import { useAutosave } from "@/components/admin/use-autosave";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import type { WizardRecipe } from "../recipe-wizard";
+import type { WizardIngredient, WizardRecipe } from "../recipe-wizard";
 import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
-type Row = { quantity: string; item: string; note: string };
+type Row = WizardIngredient;
 
-const EMPTY: Row = { quantity: "", item: "", note: "" };
+const EMPTY: Row = {
+  id: null,
+  quantity: "",
+  item: "",
+  note: "",
+  quantityTl: "",
+  itemTl: "",
+  noteTl: "",
+};
 
 export function IngredientsStep({
   recipe,
@@ -25,16 +33,18 @@ export function IngredientsStep({
   editLocale: Locale;
 }) {
   const tagalog = editLocale === "tl";
-  // Tagalog is layered onto the rows English created, so the list length is
-  // fixed here and only the words can change.
-  const source = tagalog
-    ? recipe.ingredients.map((_, i) => recipe.tl.ingredients[i] ?? EMPTY)
-    : recipe.ingredients;
-  const [rows, setRows] = useState<Row[]>(source.length ? source : [EMPTY]);
+  // One list, both languages. Adding or removing a row affects the recipe in
+  // either language; only the words differ.
+  const [rows, setRows] = useState<Row[]>(
+    recipe.ingredients.length ? recipe.ingredients : [EMPTY],
+  );
+
+  const field = (key: "quantity" | "item" | "note") =>
+    (tagalog ? (`${key}Tl` as const) : key) as keyof Row;
 
   const save = useCallback(
-    (current: Row[]) => saveIngredients(recipe.id, current, editLocale),
-    [recipe.id, editLocale],
+    (current: Row[]) => saveIngredients(recipe.id, current),
+    [recipe.id],
   );
   const { status, error } = useAutosave(rows, save);
 
@@ -49,7 +59,7 @@ export function IngredientsStep({
         title="Ingredients"
         hint={
           tagalog
-            ? "Translate each line. Add or remove ingredients on the English page."
+            ? "Translate each line. Ingredients are added and removed on the English page."
             : "Put the measurement and the ingredient in separate boxes, so students see them clearly."
         }
         status={<SaveStatusLabel status={status} error={error} />}
@@ -60,22 +70,22 @@ export function IngredientsStep({
           <div key={index} className="flex items-start gap-2">
             <div className="grid flex-1 gap-2 sm:grid-cols-[8rem_1fr_10rem]">
               <Input
-                value={row.quantity}
-                onChange={(e) => update(index, "quantity", e.target.value)}
+                value={row[field("quantity")] ?? ""}
+                onChange={(e) => update(index, field("quantity"), e.target.value)}
                 placeholder="1 kg"
                 className="h-12"
                 aria-label={`Measurement for ingredient ${index + 1}`}
               />
               <Input
-                value={row.item}
-                onChange={(e) => update(index, "item", e.target.value)}
+                value={row[field("item")] ?? ""}
+                onChange={(e) => update(index, field("item"), e.target.value)}
                 placeholder="chicken"
                 className="h-12"
                 aria-label={`Ingredient ${index + 1}`}
               />
               <Input
-                value={row.note}
-                onChange={(e) => update(index, "note", e.target.value)}
+                value={row[field("note")] ?? ""}
+                onChange={(e) => update(index, field("note"), e.target.value)}
                 placeholder="cut into pieces"
                 className="h-12"
                 aria-label={`Note for ingredient ${index + 1}`}

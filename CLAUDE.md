@@ -105,6 +105,19 @@ A recipe counts as **completed** once its quiz has been submitted at least once.
 
 ---
 
+## ⚠️ The tests write to the live database
+
+`pnpm test` runs against the real Supabase project. The suite cleans up after
+itself, but an interrupted run leaves fixture recipes, categories and accounts
+behind — and Joemarie would see them appear in his lesson list.
+
+**Do not run the tests once the module is in use with students.** If they need
+to keep running, point `.env.local` at a second, throwaway Supabase project
+first. Fixtures are recognisable by an 8-character hex suffix
+(`Draft Dish a1b2c3d4`).
+
+---
+
 ## Commands
 
 ```bash

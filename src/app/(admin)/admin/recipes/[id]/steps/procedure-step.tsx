@@ -10,11 +10,11 @@ import { useAutosave } from "@/components/admin/use-autosave";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-import type { WizardRecipe } from "../recipe-wizard";
+import type { WizardRecipe, WizardStep } from "../recipe-wizard";
 import type { Locale } from "@/lib/i18n";
 import { StepHeader } from "./basics-step";
 
-type Row = { instruction: string; imagePath: string | null };
+type Row = WizardStep;
 
 export function ProcedureStep({
   recipe,
@@ -24,21 +24,15 @@ export function ProcedureStep({
   editLocale: Locale;
 }) {
   const tagalog = editLocale === "tl";
-  // Translating never adds, removes, or reorders a step — it only replaces the
-  // words on the steps English already numbered.
-  const source = tagalog
-    ? recipe.steps.map((step, i) => ({
-        instruction: recipe.tl.steps[i]?.instruction ?? "",
-        imagePath: step.imagePath,
-      }))
-    : recipe.steps;
-  const [rows, setRows] = useState<Row[]>(
-    source.length ? source : [{ instruction: "", imagePath: null }],
-  );
+  const blank: Row = { id: null, instruction: "", instructionTl: "", imagePath: null };
+  // One list of steps carrying both languages, so reordering or removing a step
+  // means the same thing whichever language it was written in.
+  const [rows, setRows] = useState<Row[]>(recipe.steps.length ? recipe.steps : [blank]);
+  const field = tagalog ? "instructionTl" : "instruction";
 
   const save = useCallback(
-    (current: Row[]) => saveSteps(recipe.id, current, editLocale),
-    [recipe.id, editLocale],
+    (current: Row[]) => saveSteps(recipe.id, current),
+    [recipe.id],
   );
   const { status, error } = useAutosave(rows, save);
 
@@ -60,7 +54,7 @@ export function ProcedureStep({
         title="Procedure"
         hint={
           tagalog
-            ? "Translate each step. Add, remove, and reorder steps on the English page."
+            ? "Translate each step. Steps are added, removed and reordered on the English page."
             : "Write one step at a time. Steps are numbered automatically, so you can reorder them freely."
         }
         status={<SaveStatusLabel status={status} error={error} />}
@@ -114,8 +108,8 @@ export function ProcedureStep({
             </div>
 
             <Textarea
-              value={row.instruction}
-              onChange={(e) => update(index, { instruction: e.target.value })}
+              value={row[field]}
+              onChange={(e) => update(index, { [field]: e.target.value })}
               rows={2}
               placeholder="e.g. Marinate the chicken with soy sauce and garlic."
               className="text-base"
@@ -147,9 +141,7 @@ export function ProcedureStep({
           type="button"
           variant="outline"
           className="h-11 w-full font-semibold"
-          onClick={() =>
-            setRows((prev) => [...prev, { instruction: "", imagePath: null }])
-          }
+          onClick={() => setRows((prev) => [...prev, blank])}
         >
           <Plus aria-hidden />
           Add another step

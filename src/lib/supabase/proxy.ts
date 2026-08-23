@@ -12,7 +12,16 @@ import type { Database } from "@/lib/database.types";
  * have let the free-tier database pause before the defense. The route
  * authenticates itself with CRON_SECRET.
  */
-const PUBLIC_PATHS = ["/", "/login", "/register", "/offline", "/api/keep-alive"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  "/offline",
+  "/api/keep-alive",
+  // Browsers refuse to register a worker that was redirected, so a signed-out
+  // visitor could never install the app to their home screen.
+  "/sw.js",
+];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.includes(pathname);

@@ -16,14 +16,16 @@ export default async function AdminRecipesPage() {
   const { data: recipes } = await supabase
     .from("recipes")
     .select(
-      "id, title, is_published, sort_order, categories(name), quizzes(id, is_published), steps(id), ingredients(id)",
+      "id, title, title_tl, is_published, sort_order, categories(name), quizzes(id, is_published), steps(id), ingredients(id)",
     )
     .order("sort_order")
     .order("title");
 
   const rows = (recipes ?? []).map((recipe) => ({
     id: recipe.id,
-    title: recipe.title,
+    // A recipe may be written in either language, so the list shows whichever
+    // title exists.
+    title: recipe.title?.trim() || recipe.title_tl?.trim() || "Untitled recipe",
     isPublished: recipe.is_published,
     categoryName: recipe.categories?.name ?? null,
     ingredientCount: recipe.ingredients?.length ?? 0,

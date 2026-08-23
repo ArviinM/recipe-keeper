@@ -26,13 +26,11 @@ export function BasicsStep({
 }) {
   const tagalog = editLocale === "tl";
   const [values, setValues] = useState({
-    title: tagalog
-      ? recipe.tl.title
-      : recipe.title === "Untitled recipe"
-        ? ""
-        : recipe.title,
+    title: recipe.title === "Untitled recipe" ? "" : recipe.title,
+    titleTl: recipe.titleTl,
+    description: recipe.description,
+    descriptionTl: recipe.descriptionTl,
     categoryId: recipe.categoryId ?? "",
-    description: tagalog ? recipe.tl.description : recipe.description,
     difficulty: recipe.difficulty ?? "",
     servings: recipe.servings?.toString() ?? "",
     prepMinutes: recipe.prepMinutes?.toString() ?? "",
@@ -43,29 +41,32 @@ export function BasicsStep({
 
   const save = useCallback(
     (current: typeof values) =>
-      saveRecipeBasics(
-        recipe.id,
-        {
-          title: current.title,
-          categoryId: current.categoryId || null,
-          description: current.description,
-          difficulty: current.difficulty || null,
-          servings: current.servings ? Number(current.servings) : null,
-          prepMinutes: current.prepMinutes ? Number(current.prepMinutes) : null,
-          cookMinutes: current.cookMinutes ? Number(current.cookMinutes) : null,
-          videoUrl: current.videoUrl,
-        },
-        editLocale,
-      ),
-    [recipe.id, editLocale],
+      saveRecipeBasics(recipe.id, {
+        title: current.title,
+        titleTl: current.titleTl,
+        description: current.description,
+        descriptionTl: current.descriptionTl,
+        categoryId: current.categoryId || null,
+        difficulty: current.difficulty || null,
+        servings: current.servings ? Number(current.servings) : null,
+        prepMinutes: current.prepMinutes ? Number(current.prepMinutes) : null,
+        cookMinutes: current.cookMinutes ? Number(current.cookMinutes) : null,
+        videoUrl: current.videoUrl,
+      }),
+    [recipe.id],
   );
 
   const { status, error } = useAutosave(values, save);
 
   const set = (key: keyof typeof values) => (value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }));
+    // Only the English title names the recipe in the list and the URL.
     if (key === "title") onTitleChange(value);
   };
+
+  // The same field, shown in whichever language is being written.
+  const titleKey = tagalog ? "titleTl" : "title";
+  const descriptionKey = tagalog ? "descriptionTl" : "description";
 
   return (
     <div className="space-y-5">
@@ -73,7 +74,7 @@ export function BasicsStep({
         title="Recipe basics"
         hint={
           tagalog
-            ? "The Tagalog name and description. Category, photo, and timings are set on the English page."
+            ? "The Tagalog name and description. Category, photo and timings are set on the English page."
             : "Give the lesson a name and a short description. You can change any of this later."
         }
         status={<SaveStatusLabel status={status} error={error} />}
@@ -85,8 +86,8 @@ export function BasicsStep({
         </Label>
         <Input
           id="title"
-          value={values.title}
-          onChange={(e) => set("title")(e.target.value)}
+          value={values[titleKey]}
+          onChange={(e) => set(titleKey)(e.target.value)}
           placeholder="e.g. Chicken Adobo"
           className="h-12"
         />
@@ -119,8 +120,8 @@ export function BasicsStep({
         </Label>
         <Textarea
           id="description"
-          value={values.description}
-          onChange={(e) => set("description")(e.target.value)}
+          value={values[descriptionKey]}
+          onChange={(e) => set(descriptionKey)(e.target.value)}
           rows={3}
           placeholder="One or two sentences about the dish and what students will learn."
           className="text-base"

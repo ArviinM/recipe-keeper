@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { pick, type Locale } from "@/lib/i18n";
 
 export type StudentProgress = {
   recipesCompleted: number;
@@ -46,7 +47,10 @@ export type QuizStatus = {
 };
 
 /** Every published quiz with this student's best result, for the Quiz tab. */
-export async function getQuizStatuses(studentId: string): Promise<QuizStatus[]> {
+export async function getQuizStatuses(
+  studentId: string,
+  locale: Locale = "en",
+): Promise<QuizStatus[]> {
   const supabase = await createClient();
 
   // Independent of each other, so they go out together rather than one after
@@ -54,7 +58,7 @@ export async function getQuizStatuses(studentId: string): Promise<QuizStatus[]> 
   const [{ data: quizzes }, { data: attempts }] = await Promise.all([
     supabase
       .from("quizzes")
-      .select("id, title, recipes!inner(title, slug, is_published, sort_order)")
+      .select("id, title, title_tl, recipes!inner(title, title_tl, slug, is_published, sort_order)")
       .eq("is_published", true)
       .eq("recipes.is_published", true),
     supabase
@@ -93,8 +97,8 @@ export async function getQuizStatuses(studentId: string): Promise<QuizStatus[]> 
       const result = best.get(quiz.id);
       return {
         recipeSlug: quiz.recipes.slug,
-        recipeTitle: quiz.recipes.title,
-        quizTitle: quiz.title,
+        recipeTitle: pick(locale, quiz.recipes.title, quiz.recipes.title_tl),
+        quizTitle: pick(locale, quiz.title, quiz.title_tl),
         sortOrder: quiz.recipes.sort_order,
         bestPercentage: result?.pct ?? null,
         bestScore: result?.score ?? null,

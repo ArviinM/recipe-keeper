@@ -73,7 +73,7 @@ export default async function QuizPage({
       locale={user.locale}
       recipeId={recipe.id}
       recipeSlug={recipe.slug}
-      recipeTitle={recipe.title}
+      recipeTitle={recipe.title ?? ""}
       studentName={user.fullName}
       quiz={payload.quiz}
       questions={payload.questions}

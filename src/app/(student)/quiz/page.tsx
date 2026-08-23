@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: "Quizzes" };
 export default async function QuizListPage() {
   const user = await requireUser();
   const t = dictionary(user.locale);
-  const quizzes = await getQuizStatuses(user.id);
+  const quizzes = await getQuizStatuses(user.id, user.locale);
 
   return (
     <div className="space-y-6">

@@ -1,12 +1,13 @@
 import type { Client, MutationResult } from "@/lib/recipes/mutations";
-import type { Locale } from "@/lib/i18n";
 
 export type QuestionDraft = {
   id: string | null;
   prompt: string;
+  promptTl: string;
   explanation: string;
+  explanationTl: string;
   correctLabel: string;
-  choices: { id: string | null; label: string; body: string }[];
+  choices: { id: string | null; label: string; body: string; bodyTl: string }[];
 };
 
 /** Creates the quiz row on demand so the wizard always has one to write to. */
@@ -33,32 +34,23 @@ export async function saveQuizSettings(
   recipeId: string,
   values: {
     title: string;
+    titleTl: string;
     instructions: string;
+    instructionsTl: string;
     passingPercentage: number;
     revealAnswers: boolean;
     isPublished: boolean;
   },
-  locale: Locale = "en",
 ): Promise<MutationResult> {
   try {
     const quizId = await ensureQuiz(supabase, recipeId);
-
-    if (locale === "tl") {
-      const { error } = await supabase
-        .from("quizzes")
-        .update({
-          title_tl: values.title.trim() || null,
-          instructions_tl: values.instructions.trim() || null,
-        })
-        .eq("id", quizId);
-      return error ? { ok: false, error: error.message } : { ok: true };
-    }
-
     const { error } = await supabase
       .from("quizzes")
       .update({
         title: values.title.trim() || "Lesson Quiz",
+        title_tl: values.titleTl.trim() || null,
         instructions: values.instructions.trim() || null,
+        instructions_tl: values.instructionsTl.trim() || null,
         passing_percentage: Math.min(100, Math.max(0, values.passingPercentage)),
         reveal_answers: values.revealAnswers,
         is_published: values.isPublished,
@@ -82,45 +74,9 @@ export async function saveQuestions(
   supabase: Client,
   recipeId: string,
   questions: QuestionDraft[],
-  locale: Locale = "en",
 ): Promise<MutationResult> {
   try {
     const quizId = await ensureQuiz(supabase, recipeId);
-
-    // Tagalog is layered onto the questions and choices English already
-    // created. It never adds, removes, or reorders anything, so translating a
-    // quiz cannot disturb the answer key or the answers students have given.
-    if (locale === "tl") {
-      const { data: existing } = await supabase
-        .from("questions")
-        .select("id, sort_order, choices!choices_question_id_fkey(id, label)")
-        .eq("quiz_id", quizId)
-        .order("sort_order");
-
-      for (const [index, question] of (existing ?? []).entries()) {
-        const source = questions[index];
-        if (!source) continue;
-
-        const { error } = await supabase
-          .from("questions")
-          .update({
-            prompt_tl: source.prompt.trim() || null,
-            explanation_tl: source.explanation.trim() || null,
-          })
-          .eq("id", question.id);
-        if (error) return { ok: false, error: error.message };
-
-        for (const choice of question.choices) {
-          const translated = source.choices.find((c) => c.label === choice.label);
-          const { error: choiceError } = await supabase
-            .from("choices")
-            .update({ body_tl: translated?.body.trim() || null })
-            .eq("id", choice.id);
-          if (choiceError) return { ok: false, error: choiceError.message };
-        }
-      }
-      return { ok: true };
-    }
 
     const usable = questions.filter((q) => q.prompt.trim().length > 0);
     const keptIds = usable.map((q) => q.id).filter((id): id is string => Boolean(id));
@@ -146,7 +102,9 @@ export async function saveQuestions(
           .from("questions")
           .update({
             prompt: question.prompt.trim(),
+            prompt_tl: question.promptTl.trim() || null,
             explanation: question.explanation.trim() || null,
+            explanation_tl: question.explanationTl.trim() || null,
             sort_order: index + 1,
           })
           .eq("id", questionId);
@@ -157,7 +115,9 @@ export async function saveQuestions(
           .insert({
             quiz_id: quizId,
             prompt: question.prompt.trim(),
+            prompt_tl: question.promptTl.trim() || null,
             explanation: question.explanation.trim() || null,
+            explanation_tl: question.explanationTl.trim() || null,
             sort_order: index + 1,
           })
           .select("id")
@@ -166,38 +126,72 @@ export async function saveQuestions(
         questionId = data.id;
       }
 
-      // Cleared first so the choice rows can be rewritten without tripping the
-      // foreign key from questions.correct_choice_id.
-      await supabase
-        .from("questions")
-        .update({ correct_choice_id: null })
-        .eq("id", questionId);
+      // Choices are updated in place rather than replaced. attempt_answers
+      // references choices with ON DELETE SET NULL, so deleting and reinserting
+      // them would erase which distractor each student actually picked — the
+      // data an item analysis depends on — and would drop body_tl, wiping the
+      // Tagalog translation whenever the English text is edited.
+      const { data: existingChoices } = await supabase
+        .from("choices")
+        .select("id, label")
+        .eq("question_id", questionId);
 
-      const choices = question.choices.filter((c) => c.body.trim().length > 0);
-      await supabase.from("choices").delete().eq("question_id", questionId);
+      const wanted = question.choices.filter((c) => c.body.trim().length > 0);
+      const byLabel = new Map((existingChoices ?? []).map((c) => [c.label, c.id]));
+      const idByLabel = new Map<string, string>();
 
-      if (choices.length) {
-        const { data: inserted, error } = await supabase
-          .from("choices")
-          .insert(
-            choices.map((choice, choiceIndex) => ({
-              question_id: questionId,
-              label: choice.label,
-              body: choice.body.trim(),
-              sort_order: choiceIndex + 1,
-            })),
-          )
-          .select("id, label");
-        if (error) return { ok: false, error: error.message };
+      for (const [choiceIndex, choice] of wanted.entries()) {
+        const existingId = byLabel.get(choice.label);
+        const values = {
+          label: choice.label,
+          body: choice.body.trim(),
+          body_tl: choice.bodyTl.trim() || null,
+          sort_order: choiceIndex + 1,
+        };
 
-        const correct = inserted?.find((c) => c.label === question.correctLabel);
-        if (correct) {
-          await supabase
-            .from("questions")
-            .update({ correct_choice_id: correct.id })
-            .eq("id", questionId);
+        if (existingId) {
+          const { error } = await supabase
+            .from("choices")
+            .update(values)
+            .eq("id", existingId);
+          if (error) return { ok: false, error: error.message };
+          idByLabel.set(choice.label, existingId);
+        } else {
+          const { data, error } = await supabase
+            .from("choices")
+            .insert({ question_id: questionId, ...values })
+            .select("id")
+            .single();
+          if (error || !data) {
+            return { ok: false, error: error?.message ?? "choice insert failed" };
+          }
+          idByLabel.set(choice.label, data.id);
         }
       }
+
+      // Only labels the teacher actually removed are deleted.
+      const wantedLabels = new Set(wanted.map((c) => c.label));
+      const staleIds = (existingChoices ?? [])
+        .filter((c) => !wantedLabels.has(c.label))
+        .map((c) => c.id);
+
+      if (staleIds.length) {
+        // The answer key is released first so the foreign key from
+        // questions.correct_choice_id does not block the delete.
+        await supabase
+          .from("questions")
+          .update({ correct_choice_id: null })
+          .eq("id", questionId);
+        const { error } = await supabase.from("choices").delete().in("id", staleIds);
+        if (error) return { ok: false, error: error.message };
+      }
+
+      const correctId = idByLabel.get(question.correctLabel) ?? null;
+      const { error: keyError } = await supabase
+        .from("questions")
+        .update({ correct_choice_id: correctId })
+        .eq("id", questionId);
+      if (keyError) return { ok: false, error: keyError.message };
     }
 
     return { ok: true };

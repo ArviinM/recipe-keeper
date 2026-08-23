@@ -47,9 +47,11 @@ export default async function SplashPage() {
           </p>
         )}
 
-        <p className="text-muted-foreground pt-4 text-center text-xs">
-          {site.schoolName}
-        </p>
+        {site.schoolName && (
+          <p className="text-muted-foreground pt-4 text-center text-xs">
+            {site.schoolName}
+          </p>
+        )}
       </div>
     </main>
   );

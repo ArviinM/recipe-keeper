@@ -13,7 +13,7 @@ export default async function ProgressPage() {
   const t = dictionary(user.locale);
   const [progress, quizzes] = await Promise.all([
     getProgress(user.id),
-    getQuizStatuses(user.id),
+    getQuizStatuses(user.id, user.locale),
   ]);
 
   const taken = quizzes.filter((q) => q.attempts > 0);

@@ -8,11 +8,13 @@ export const LOCALES: { value: Locale; label: string }[] = [
 ];
 
 /**
- * Picks the reader's language, falling back to English whenever a translation
- * is missing.
+ * Picks the reader's language, falling back to English when a translation is
+ * missing.
  *
- * This is what makes translating gradual: a recipe with only half its Tagalog
- * filled in shows complete English for the rest, never blanks.
+ * English is the language a lesson is written in and Tagalog is a translation
+ * of it, so the fallback runs one way. That is what makes translating gradual:
+ * a recipe with only half its Tagalog filled in reads as complete English for
+ * the rest, never as blanks.
  */
 export function pick(
   locale: Locale,
@@ -23,10 +25,10 @@ export function pick(
     const translated = tagalog?.trim();
     if (translated) return translated;
   }
-  return english ?? "";
+  return english?.trim() ?? "";
 }
 
-/** Same fallback for the bullet lists, which are all-or-nothing per list. */
+/** Same fallback for the bullet lists, which are translated as a whole. */
 export function pickList(
   locale: Locale,
   english: string[] | null | undefined,

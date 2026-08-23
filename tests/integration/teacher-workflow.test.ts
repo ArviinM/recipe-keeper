@@ -57,8 +57,10 @@ describe("teacher workflow", () => {
 
     await recipes.saveRecipeBasics(teacherDb, id!, {
       title,
-      categoryId: null,
+      titleTl: "",
       description: "Fixture.",
+      descriptionTl: "",
+      categoryId: null,
       difficulty: "easy",
       servings: 4,
       prepMinutes: 10,
@@ -92,9 +94,9 @@ describe("teacher workflow", () => {
     const id = await newDraft(`Ingredients ${run}`);
 
     await recipes.saveIngredients(teacherDb, id, [
-      { quantity: "1 kg", item: "chicken", note: "cut up" },
-      { quantity: "", item: "", note: "" },
-      { quantity: "½ cup", item: "soy sauce", note: "" },
+      { id: null, quantity: "1 kg", item: "chicken", note: "cut up", quantityTl: "", itemTl: "", noteTl: "" },
+      { id: null, quantity: "", item: "", note: "", quantityTl: "", itemTl: "", noteTl: "" },
+      { id: null, quantity: "½ cup", item: "soy sauce", note: "", quantityTl: "", itemTl: "", noteTl: "" },
     ]);
 
     const { data } = await admin
@@ -113,16 +115,16 @@ describe("teacher workflow", () => {
     const id = await newDraft(`Steps ${run}`);
 
     await recipes.saveSteps(teacherDb, id, [
-      { instruction: "First", imagePath: null },
-      { instruction: "Second", imagePath: null },
-      { instruction: "Third", imagePath: null },
+      { id: null, instruction: "First", instructionTl: "", imagePath: null },
+      { id: null, instruction: "Second", instructionTl: "", imagePath: null },
+      { id: null, instruction: "Third", instructionTl: "", imagePath: null },
     ]);
 
     // Teacher moves the last step to the front.
     await recipes.saveSteps(teacherDb, id, [
-      { instruction: "Third", imagePath: null },
-      { instruction: "First", imagePath: null },
-      { instruction: "Second", imagePath: null },
+      { id: null, instruction: "Third", instructionTl: "", imagePath: null },
+      { id: null, instruction: "First", instructionTl: "", imagePath: null },
+      { id: null, instruction: "Second", instructionTl: "", imagePath: null },
     ]);
 
     const { data } = await admin
@@ -153,8 +155,10 @@ describe("teacher workflow", () => {
 
     const result = await recipes.saveRecipeBasics(studentDb, id, {
       title: "Hijacked",
-      categoryId: null,
+      titleTl: "",
       description: "",
+      descriptionTl: "",
+      categoryId: null,
       difficulty: null,
       servings: null,
       prepMinutes: null,
@@ -174,12 +178,15 @@ describe("teacher workflow", () => {
     const draft = {
       id: null as string | null,
       prompt: "Which is correct?",
+      promptTl: "",
       explanation: "",
+      explanationTl: "",
       correctLabel: "A",
       choices: ["A", "B", "C", "D"].map((label) => ({
         id: null,
         label,
         body: `Choice ${label}`,
+        bodyTl: "",
       })),
     };
 
@@ -222,19 +229,24 @@ describe("teacher workflow", () => {
     const drafts = [1, 2].map((n) => ({
       id: null as string | null,
       prompt: `Question ${n}?`,
+      promptTl: "",
       explanation: "",
+      explanationTl: "",
       correctLabel: "B",
       choices: ["A", "B", "C", "D"].map((label) => ({
         id: null,
         label,
         body: `Choice ${label}`,
+        bodyTl: "",
       })),
     }));
 
     await quizzes.saveQuestions(teacherDb, id, drafts);
     await quizzes.saveQuizSettings(teacherDb, id, {
       title: "History Quiz",
+      titleTl: "",
       instructions: "",
+      instructionsTl: "",
       passingPercentage: 50,
       revealAnswers: false,
       isPublished: true,
@@ -291,9 +303,16 @@ describe("teacher workflow", () => {
     const drafts = [1, 2, 3].map((n) => ({
       id: null as string | null,
       prompt: `Q${n}?`,
+      promptTl: "",
       explanation: "",
+      explanationTl: "",
       correctLabel: "A",
-      choices: ["A", "B"].map((label) => ({ id: null, label, body: `Choice ${label}` })),
+      choices: ["A", "B"].map((label) => ({
+        id: null,
+        label,
+        body: `Choice ${label}`,
+        bodyTl: "",
+      })),
     }));
 
     await quizzes.saveQuestions(teacherDb, id, drafts);

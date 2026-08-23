@@ -25,9 +25,11 @@ type Question = WizardRecipe["quiz"]["questions"][number];
 const blankQuestion = (): Question => ({
   id: null,
   prompt: "",
+  promptTl: "",
   explanation: "",
+  explanationTl: "",
   correctLabel: "",
-  choices: LABELS.map((label) => ({ id: null, label, body: "" })),
+  choices: LABELS.map((label) => ({ id: null, label, body: "", bodyTl: "" })),
 });
 
 export function QuizStep({
@@ -38,40 +40,36 @@ export function QuizStep({
   editLocale: Locale;
 }) {
   const tagalog = editLocale === "tl";
+
   const [settings, setSettings] = useState({
-    title: tagalog ? recipe.tl.quizTitle : recipe.quiz.title,
-    instructions: tagalog ? recipe.tl.quizInstructions : recipe.quiz.instructions,
+    title: recipe.quiz.title,
+    titleTl: recipe.quiz.titleTl,
+    instructions: recipe.quiz.instructions,
+    instructionsTl: recipe.quiz.instructionsTl,
     passingPercentage: recipe.quiz.passingPercentage,
     revealAnswers: recipe.quiz.revealAnswers,
     isPublished: recipe.quiz.isPublished,
   });
-  // Translating layers words onto the existing questions; the answer key and
-  // the question list are only ever changed on the English page.
-  const questionSource = tagalog
-    ? recipe.quiz.questions.map((q, i) => ({
-        ...q,
-        prompt: recipe.tl.questions[i]?.prompt ?? "",
-        explanation: recipe.tl.questions[i]?.explanation ?? "",
-        choices: q.choices.map((choice) => ({
-          ...choice,
-          body:
-            recipe.tl.questions[i]?.choices.find((c) => c.label === choice.label)
-              ?.body ?? "",
-        })),
-      }))
-    : recipe.quiz.questions;
 
+  // One question list carrying both languages, so adding or removing a
+  // question means the same thing whichever language it was written in.
   const [questions, setQuestions] = useState<Question[]>(
-    questionSource.length ? questionSource : [blankQuestion()],
+    recipe.quiz.questions.length ? recipe.quiz.questions : [blankQuestion()],
   );
+
+  const titleKey = tagalog ? "titleTl" : "title";
+  const instructionsKey = tagalog ? "instructionsTl" : "instructions";
+  const promptKey = tagalog ? "promptTl" : "prompt";
+  const explanationKey = tagalog ? "explanationTl" : "explanation";
+  const bodyKey = tagalog ? "bodyTl" : "body";
 
   const saveSettings = useCallback(
-    (current: typeof settings) => saveQuizSettings(recipe.id, current, editLocale),
-    [recipe.id, editLocale],
+    (current: typeof settings) => saveQuizSettings(recipe.id, current),
+    [recipe.id],
   );
   const saveQs = useCallback(
-    (current: Question[]) => saveQuestions(recipe.id, current, editLocale),
-    [recipe.id, editLocale],
+    (current: Question[]) => saveQuestions(recipe.id, current),
+    [recipe.id],
   );
 
   const settingsSave = useAutosave(settings, saveSettings);
@@ -82,13 +80,15 @@ export function QuizStep({
       prev.map((q, i) => (i === index ? { ...q, ...patch } : q)),
     );
 
-  const updateChoice = (qIndex: number, label: string, body: string) =>
+  const updateChoice = (qIndex: number, label: string, value: string) =>
     setQuestions((prev) =>
       prev.map((q, i) =>
         i === qIndex
           ? {
               ...q,
-              choices: q.choices.map((c) => (c.label === label ? { ...c, body } : c)),
+              choices: q.choices.map((c) =>
+                c.label === label ? { ...c, [bodyKey]: value } : c,
+              ),
             }
           : q,
       ),
@@ -113,8 +113,10 @@ export function QuizStep({
           </Label>
           <Input
             id="quizTitle"
-            value={settings.title}
-            onChange={(e) => setSettings((p) => ({ ...p, title: e.target.value }))}
+            value={settings[titleKey]}
+            onChange={(e) =>
+              setSettings((p) => ({ ...p, [titleKey]: e.target.value }))
+            }
             className="h-12"
           />
         </div>
@@ -125,15 +127,16 @@ export function QuizStep({
           </Label>
           <Textarea
             id="quizInstructions"
-            value={settings.instructions}
-            onChange={(e) => setSettings((p) => ({ ...p, instructions: e.target.value }))}
+            value={settings[instructionsKey]}
+            onChange={(e) =>
+              setSettings((p) => ({ ...p, [instructionsKey]: e.target.value }))
+            }
             rows={2}
             placeholder="Read each question carefully and choose the best answer."
             className="text-base"
           />
         </div>
 
-        {!tagalog && (
         <div className="space-y-2">
           <Label htmlFor="passing" className="text-base">
             Passing score (%)
@@ -151,9 +154,7 @@ export function QuizStep({
             className="h-12 w-32"
           />
         </div>
-        )}
 
-        {!tagalog && (
         <Card>
           <CardContent className="space-y-4">
             <ToggleRow
@@ -170,7 +171,6 @@ export function QuizStep({
             />
           </CardContent>
         </Card>
-        )}
       </section>
 
       <section className="space-y-4">
@@ -212,8 +212,10 @@ export function QuizStep({
                 </div>
 
                 <Textarea
-                  value={question.prompt}
-                  onChange={(e) => updateQuestion(index, { prompt: e.target.value })}
+                  value={question[promptKey]}
+                  onChange={(e) =>
+                    updateQuestion(index, { [promptKey]: e.target.value })
+                  }
                   rows={2}
                   placeholder="e.g. What should be done before preparing the ingredients?"
                   className="text-base"
@@ -248,7 +250,7 @@ export function QuizStep({
                           {choice.label}
                         </button>
                         <Input
-                          value={choice.body}
+                          value={choice[bodyKey]}
                           onChange={(e) =>
                             updateChoice(index, choice.label, e.target.value)
                           }
@@ -266,9 +268,9 @@ export function QuizStep({
                     Explanation (optional, shown only if answers are revealed)
                   </Label>
                   <Input
-                    value={question.explanation}
+                    value={question[explanationKey]}
                     onChange={(e) =>
-                      updateQuestion(index, { explanation: e.target.value })
+                      updateQuestion(index, { [explanationKey]: e.target.value })
                     }
                     className="h-11"
                   />

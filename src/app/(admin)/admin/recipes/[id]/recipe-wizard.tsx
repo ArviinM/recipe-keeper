@@ -16,11 +16,46 @@ import { NotesStep } from "./steps/notes-step";
 import { QuizStep } from "./steps/quiz-step";
 import { PublishStep } from "./steps/publish-step";
 
+export type WizardIngredient = {
+  id: string | null;
+  quantity: string;
+  item: string;
+  note: string;
+  quantityTl: string;
+  itemTl: string;
+  noteTl: string;
+};
+
+export type WizardStep = {
+  id: string | null;
+  instruction: string;
+  instructionTl: string;
+  imagePath: string | null;
+};
+
+export type WizardQuestion = {
+  id: string | null;
+  prompt: string;
+  promptTl: string;
+  explanation: string;
+  explanationTl: string;
+  correctLabel: string;
+  choices: { id: string | null; label: string; body: string; bodyTl: string }[];
+};
+
+/**
+ * One structure, two languages. A recipe has a single list of ingredients and
+ * steps; each row may carry English words, Tagalog words, or both. Keeping the
+ * languages in separate drafts meant a row added in one pane was deleted by the
+ * other pane's next save.
+ */
 export type WizardRecipe = {
   id: string;
   title: string;
+  titleTl: string;
   slug: string;
   description: string;
+  descriptionTl: string;
   imagePath: string | null;
   videoUrl: string | null;
   categoryId: string | null;
@@ -30,37 +65,23 @@ export type WizardRecipe = {
   cookMinutes: number | null;
   isPublished: boolean;
   objectives: string[];
+  objectivesTl: string[];
   safetyNotes: string[];
+  safetyNotesTl: string[];
   chefTips: string[];
-  ingredients: { quantity: string; item: string; note: string }[];
-  steps: { instruction: string; imagePath: string | null }[];
+  chefTipsTl: string[];
+  ingredients: WizardIngredient[];
+  steps: WizardStep[];
   techniqueIds: string[];
   quiz: {
     title: string;
+    titleTl: string;
     instructions: string;
+    instructionsTl: string;
     passingPercentage: number;
     revealAnswers: boolean;
     isPublished: boolean;
-    questions: {
-      id: string | null;
-      prompt: string;
-      explanation: string;
-      correctLabel: string;
-      choices: { id: string | null; label: string; body: string }[];
-    }[];
-  };
-  /** The Tagalog twin of everything above that carries words. */
-  tl: {
-    title: string;
-    description: string;
-    objectives: string[];
-    safetyNotes: string[];
-    chefTips: string[];
-    ingredients: { quantity: string; item: string; note: string }[];
-    steps: { instruction: string; imagePath: string | null }[];
-    quizTitle: string;
-    quizInstructions: string;
-    questions: WizardRecipe["quiz"]["questions"];
+    questions: WizardQuestion[];
   };
 };
 
@@ -108,8 +129,7 @@ export function RecipeWizard({
           </span>
         </div>
 
-        {/* English is written first because it is what students fall back to
-            when a translation is missing. */}
+        {/* English is what a lesson is written in; Tagalog translates it. */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-sm font-semibold">
             Writing in
@@ -166,43 +186,43 @@ export function RecipeWizard({
         </nav>
       </div>
 
+      {/* Every step stays mounted and inactive ones are hidden. Unmounting
+          them threw away edits made since the page loaded, and autosave then
+          wrote the stale copy back over the database. */}
+      {/* Every step stays mounted and inactive ones are hidden. Unmounting them
+          discarded anything typed since the page loaded, and the next keystroke
+          then autosaved that stale copy over the newer rows in the database. */}
       <div className="min-h-[24rem]">
-        {step.key === "basics" && (
+        <div hidden={step.key !== "basics"}>
           <BasicsStep
-            key={editLocale}
             recipe={recipe}
             categories={categories}
             onTitleChange={setTitle}
             editLocale={editLocale}
           />
-        )}
-        {step.key === "objectives" && (
-          <ObjectivesStep key={editLocale} recipe={recipe} editLocale={editLocale} />
-        )}
-        {step.key === "ingredients" && (
-          <IngredientsStep key={editLocale} recipe={recipe} editLocale={editLocale} />
-        )}
-        {step.key === "procedure" && (
-          <ProcedureStep key={editLocale} recipe={recipe} editLocale={editLocale} />
-        )}
-        {step.key === "notes" && (
-          <NotesStep
-            key={editLocale}
-            recipe={recipe}
-            techniques={techniques}
-            editLocale={editLocale}
-          />
-        )}
-        {step.key === "quiz" && (
-          <QuizStep key={editLocale} recipe={recipe} editLocale={editLocale} />
-        )}
-        {step.key === "publish" && (
+        </div>
+        <div hidden={step.key !== "objectives"}>
+          <ObjectivesStep recipe={recipe} editLocale={editLocale} />
+        </div>
+        <div hidden={step.key !== "ingredients"}>
+          <IngredientsStep recipe={recipe} editLocale={editLocale} />
+        </div>
+        <div hidden={step.key !== "procedure"}>
+          <ProcedureStep recipe={recipe} editLocale={editLocale} />
+        </div>
+        <div hidden={step.key !== "notes"}>
+          <NotesStep recipe={recipe} techniques={techniques} editLocale={editLocale} />
+        </div>
+        <div hidden={step.key !== "quiz"}>
+          <QuizStep recipe={recipe} editLocale={editLocale} />
+        </div>
+        <div hidden={step.key !== "publish"}>
           <PublishStep
             recipe={recipe}
             published={published}
             onPublishedChange={setPublished}
           />
-        )}
+        </div>
       </div>
 
       <div className="flex gap-3 border-t pt-4">

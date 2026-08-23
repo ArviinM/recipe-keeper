@@ -5,6 +5,7 @@ export const site = {
   name: "Recipe Keeper",
   tagline: "Learn, practice, and cook with confidence.",
   subtitle: "Mobile-Based Recipe Module for Grade 9 Cookery",
-  // TODO: replace with the actual school name before the defense.
-  schoolName: "Your School Name",
+  // Shown under the Get Started button once set. Left empty on purpose: a
+  // visible placeholder reads as an unfinished product to a thesis panel.
+  schoolName: "",
 } as const;
